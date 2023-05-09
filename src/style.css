@@ -1,0 +1,30 @@
+#mainBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+    position: relative;
+}
+
+#metric-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.metric-container-inner {
+    padding: 10px;
+    min-width: 530px;
+}
+
+.metric {
+    transition: all 0.2s ease-in-out;
+}
+  
+.metric:hover {
+transform: scale(1.05);
+}
+
+#metricCircle {
+    border-radius: 50%;
+}

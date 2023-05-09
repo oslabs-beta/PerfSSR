@@ -36,19 +36,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('msg received from contentScript: ', message)
   console.log('sender: ', sender)
 
+  // send metrics to devtools.js
+  if (message.metricName && message.value) {
+    chrome.runtime.sendMessage({
+      metricName: message.metricName,
+      value: message.value
+    });
+  }
+  
   if (sender.tab) {
-    if (message.click === true) {
-        console.log('I am here!');
-        const response = {
-            xPosition: message.xPosition,
-            yPosition: message.yPosition
-        };
-        // Check if the tab has a connection established
-        if (connections[sender.tab.id]) {
-            // Send the response to the DevTools script
-            connections[sender.tab.id].postMessage(response);
-        }
-    }
+    // if (message.click === true) {
+    //     console.log('I am here!');
+    //     const response = {
+    //         xPosition: message.xPosition,
+    //         yPosition: message.yPosition
+    //     };
+    //     // Check if the tab has a connection established
+    //     if (connections[sender.tab.id]) {
+    //       // Send the response to the DevTools script
+    //       connections[sender.tab.id].postMessage(response);
+    //   }
+    // }
+
 
   // Send message to corresponding dev tool instance
     // let tabId = `${sender.tab.id}`;
