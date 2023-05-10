@@ -14,13 +14,20 @@
     "service_worker": "background.js"
   },
 
-  "permissions": ["tabs", "webRequest"],
-  "host_permissions": ["http://localhost:3000/*"],
+  "permissions": ["tabs", "activeTab", "webRequest", "scripting"],
+  "host_permissions": ["http://localhost/*"],
 
   "content_scripts": [
     {
       "matches": ["http://localhost:3000/*"],
       "js": ["contentScript.js"]
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["bundles/backend.bundle.js"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

@@ -36,10 +36,10 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 chrome.webRequest.onSendHeaders.addListener(
   function (details) {
-    console.log("On before send headers", details);
+    //console.log("On before send headers", details);
     const { requestId } = details;
 
-    console.log(details);
+    //console.log(details);
 
     details.requestHeaders.forEach((req) => {
       if (req.name.toLowerCase().includes("rsc")) {
@@ -79,7 +79,7 @@ chrome.webRequest.onCompleted.addListener(
       networkMap.set(requestId, matchedObj);
     }
 
-    console.log("networkmap:", networkMap);
+    //console.log("networkmap:", networkMap);
   },
   { urls: ["http://localhost:3000/*"] },
   //Add the response headers to the result of the callback
@@ -100,9 +100,31 @@ const sendMessageToDevTool = (msg) => {
 chrome.runtime.onConnect.addListener((port) => {
   //Listen to messages from dev tool
   const devToolsListener = (message, port) => {
+    const injectScript = (file) => {
+      try {
+        const htmlBody = document.getElementsByTagName("body")[0];
+        const script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        script.setAttribute("src", file);
+        htmlBody.appendChild(script);
+      } catch (error) {
+        console.log("background error:", error.message);
+      }
+    };
+
+    // inject script
+    chrome.scripting
+      .executeScript({
+        target: { tabId: message.tabId },
+        function: injectScript,
+        args: [chrome.runtime.getURL("/bundles/backend.bundle.js")],
+        injectImmediately: true,
+      })
+
     console.log("msg received from dev tool: ", message);
     console.log("port ", port);
     if (message.name === "init" && message.tabId) {
+      console.log("tabID from devtol", message.tabId);
       connections[message.tabId] = port;
       connections[message.tabId].postMessage("Connected!");
     }
@@ -111,9 +133,9 @@ chrome.runtime.onConnect.addListener((port) => {
   // Listen to messages sent from the DevTools page
   port.onMessage.addListener(devToolsListener);
 
-  //Send a message from background.js to dev tool
-  currPort = port; //need to set currPort to current port being listened
-  sendMessageToDevTool("hello from bg.js");
+  // //Send a message from background.js to dev tool
+  // currPort = port; //need to set currPort to current port being listened
+  // sendMessageToDevTool("hello from bg.js");
 
   // Disconnect
   port.onDisconnect.addListener((port) => {
@@ -131,8 +153,8 @@ chrome.runtime.onConnect.addListener((port) => {
 
 // Listener for messages from contentScript.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("msg received from contentScript: ", message);
-  console.log("sender: ", sender);
+  // console.log("msg received from contentScript: ", message);
+  // console.log("sender: ", sender);
 
   // send metrics received from contentScript.js to devtools.js
   if (message.metricName && message.value) {

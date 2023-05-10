@@ -4,8 +4,8 @@ import '../style.css';
 
 const Metric = ({ name, value, handleClick, size, isActive, description }) => {
     const color = value >= 90 ? "success" : value >= 70 ? "warning" : "error";
-    console.log('metric name: ', name)
-    console.log('metric value: ', value)
+    //console.log('metric name: ', name)
+    //console.log('metric value: ', value)
     return (
         <div>
             <Box
