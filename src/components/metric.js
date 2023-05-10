@@ -4,7 +4,7 @@ import CustomTooltip from "./customTooltip";
 import '../style.css';
 
 const Metric = ({ name, value, handleClick, size, isActive, description }) => {
-    const color = value >= 90 ? "success" : value >= 60 ? "warning" : "error";
+    const color = value >= 80 ? "success" : value >= 60 ? "warning" : "error";
 
     return (
         <CustomTooltip
