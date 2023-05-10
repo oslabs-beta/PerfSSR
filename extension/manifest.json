@@ -1,26 +1,26 @@
 {
-    "manifest_version": 3,
-    "name": "PerfSSR",
-    "version": "1.0.1",
-  
-    "description": "A Next.js Performance Analytics Tool",
-  
-    "author": "PerfSSR team",  
-    "devtools_page": "devtools.html",
-    "update_url": "https://path/to/updateInfo.xml",
-    "version_name": "1.0 beta",
+  "manifest_version": 3,
+  "name": "PerfSSR",
+  "version": "1.0.1",
 
-    "background": {
-      "service_worker": "background.js"
-    },
+  "description": "A Next.js Performance Analytics Tool",
 
-    "permissions": ["tabs"],
-    "host_permissions": ["<all_urls>"],
-    
-    "content_scripts": [
-      {
-          "matches": ["<all_urls>"],
-          "js": ["contentScript.js"]
-      }
-   ]
+  "author": "PerfSSR team",
+  "devtools_page": "devtools.html",
+  "update_url": "https://path/to/updateInfo.xml",
+  "version_name": "1.0 beta",
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "permissions": ["tabs", "webRequest"],
+  "host_permissions": ["http://localhost:3000/*"],
+
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:3000/*"],
+      "js": ["contentScript.js"]
+    }
+  ]
 }

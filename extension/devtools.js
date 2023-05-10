@@ -11,7 +11,7 @@ chrome.devtools.panels.create("PerfSSR",
     //     })
     // })                              
     //}
-                              );
+);
 
 // listen to background.js / contentScript.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
