@@ -1,13 +1,18 @@
 import React from "react";
 import { CircularProgress, Typography, Box } from "@mui/material";
+import CustomTooltip from "./customTooltip";
 import '../style.css';
 
 const Metric = ({ name, value, handleClick, size, isActive, description }) => {
-    const color = value >= 90 ? "success" : value >= 70 ? "warning" : "error";
-    console.log('metric name: ', name)
-    console.log('metric value: ', value)
+    const color = value >= 80 ? "success" : value >= 60 ? "warning" : "error";
+
     return (
-        <div>
+        <CustomTooltip
+        className='suggestion-tooltip'
+        disableInteractive
+        title={description}
+        placement='top'
+        >
             <Box
                 className='metric'
                 //onClick={(_) => handleClick(name)}
@@ -71,7 +76,7 @@ const Metric = ({ name, value, handleClick, size, isActive, description }) => {
                 </Typography>
                 </Box>
             </Box>            
-        </div>
+        </CustomTooltip>
     )
 }
 
