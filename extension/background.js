@@ -2,7 +2,7 @@ const connections = {};
 let currPort;
 const tabStatus = {};
 const responseSender = {};
-const networkMap = new Map();
+const networkMap = {};
 
 /*
 Info neded from network request/response
@@ -52,7 +52,7 @@ chrome.webRequest.onSendHeaders.addListener(
         };
         networkObj.networkReq = details;
 
-        networkMap.set(requestId, networkObj);
+        networkMap[requestId] = networkObj;
       }
     });
   },
@@ -69,15 +69,15 @@ chrome.webRequest.onCompleted.addListener(
     //onComplete, we know request is done so set tabStatus to complete
     tabStatus[details.tabId] = 'complete';
 
-    if (networkMap.has(requestId)) {
-      const matchedObj = networkMap.get(requestId);
+    if (networkMap[requestId]) {
+      const matchedObj = networkMap[requestId];
       matchedObj.networkRes = details;
-      networkMap.set(requestId, matchedObj);
+      networkMap[requestId] = matchedObj;
     }
 
     console.log("networkmap:", networkMap);
     //send data to dev tools each time we get new item
-    sendMessageToDevTool(networkMap);
+    sendMessageToDevTool({data: networkMap});
     
   },
   { urls: ["http://localhost:3000/*"] },
@@ -94,6 +94,7 @@ const sendMessageToDevTool = (msg) => {
   console.log("background.js sending message to dev tool:", msg);
   chrome.runtime.sendMessage({ message: msg });
 };
+
 
 // Establish connection with dev tool
 // will not fire until chrome.runtime.connect is invoked

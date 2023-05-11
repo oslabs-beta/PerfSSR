@@ -31,6 +31,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         value: message.value
         }, '*');
     }
+
+    //if we get a message from background.js with the data
+    //send to App.js
+    if (message.data) {
+        window.postMessage({
+        type: 'componentMetrics',
+        data: message.data,
+        }, '*');
+    }
     // if (message.metricName === 'FCP') {
     //   // Display FCP value
     //   console.log('FCP:', message.value);
