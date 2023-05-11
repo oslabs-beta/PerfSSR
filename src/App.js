@@ -3,6 +3,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Box } from "@mui/material";
 import MetricContainer from "./components/metricContainer";
 import BarChart from "./components/barChart";
+import HorizontalBar from "./components/horizontalBar";
 import './style.css';
 
 function App() {
@@ -59,6 +60,9 @@ function App() {
           </Box>
         </ThemeProvider>
         <BarChart />
+        <BarChart />
+        <HorizontalBar />
+        
       </div>
     )
 }
