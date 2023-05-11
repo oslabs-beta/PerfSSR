@@ -13,6 +13,7 @@ chrome.devtools.panels.create("PerfSSR",
     //}
 );
 
+
 // listen to background.js / contentScript.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("messaged received in devtools.js: ", message)

@@ -1,5 +1,7 @@
 const connections = {};
 let currPort;
+const tabStatus = {};
+const responseSender = {};
 const networkMap = new Map();
 
 /*
@@ -29,6 +31,9 @@ chrome.webRequest.onBeforeRequest.addListener(
   function (details) {
     // Request started, capture start time
     //console.log("Request started: ", details);
+
+    //before request, set tabStatus to loading to track content status
+    tabStatus[details.tabId] = 'loading';
   },
   { urls: ["http://localhost:3000/*"] },
   ["extraHeaders", "requestBody"]
@@ -36,10 +41,8 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 chrome.webRequest.onSendHeaders.addListener(
   function (details) {
-    console.log("On before send headers", details);
+    // console.log("On before send headers", details);
     const { requestId } = details;
-
-    console.log(details);
 
     details.requestHeaders.forEach((req) => {
       if (req.name.toLowerCase().includes("rsc")) {
@@ -52,14 +55,6 @@ chrome.webRequest.onSendHeaders.addListener(
         networkMap.set(requestId, networkObj);
       }
     });
-
-    // const networkObj = {
-    //   networkReq: null,
-    //   networkRes: null,
-    // };
-    // networkObj.networkReq = details;
-
-    // networkMap.set(requestId, networkObj);
   },
   { urls: ["http://localhost:3000/*"] },
   ["requestHeaders"]
@@ -71,7 +66,8 @@ chrome.webRequest.onCompleted.addListener(
     //console.log("Request finished: ", details);
     const { requestId } = details;
 
-    //console.log(requestId);
+    //onComplete, we know request is done so set tabStatus to complete
+    tabStatus[details.tabId] = 'complete';
 
     if (networkMap.has(requestId)) {
       const matchedObj = networkMap.get(requestId);
@@ -80,6 +76,9 @@ chrome.webRequest.onCompleted.addListener(
     }
 
     console.log("networkmap:", networkMap);
+    //send data to dev tools each time we get new item
+    sendMessageToDevTool(networkMap);
+    
   },
   { urls: ["http://localhost:3000/*"] },
   //Add the response headers to the result of the callback
@@ -87,6 +86,7 @@ chrome.webRequest.onCompleted.addListener(
 );
 
 const sendMessageToDevTool = (msg) => {
+  console.log("port inside", currPort);
   if (currPort === undefined) {
     console.log("background.js: no port to send message to!");
     return;
@@ -98,6 +98,9 @@ const sendMessageToDevTool = (msg) => {
 // Establish connection with dev tool
 // will not fire until chrome.runtime.connect is invoked
 chrome.runtime.onConnect.addListener((port) => {
+  
+  currPort = port;
+  console.log('connected port', currPort);
   //Listen to messages from dev tool
   const devToolsListener = (message, port) => {
     console.log("msg received from dev tool: ", message);
@@ -108,12 +111,13 @@ chrome.runtime.onConnect.addListener((port) => {
     }
     console.log("connections: ", connections);
   };
+
   // Listen to messages sent from the DevTools page
   port.onMessage.addListener(devToolsListener);
 
-  //Send a message from background.js to dev tool
-  currPort = port; //need to set currPort to current port being listened
-  sendMessageToDevTool("hello from bg.js");
+  // //Send a message from background.js to dev tool
+  // currPort = port; //need to set currPort to current port being listened
+  // sendMessageToDevTool(networkMap);
 
   // Disconnect
   port.onDisconnect.addListener((port) => {
@@ -141,6 +145,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       value: message.value,
     });
   }
+
+  // console.log('message', message);
+  // //send networkMap when requested elsewhere
+  // if (message.getInfo) {
+  //   if (tabStatus[sender.tab.id] === 'complete') {
+  //     sendResponse({data: 'sending complete data from bg to devtools'});
+  //   }
+  // } else {
+  //   //send later, set the function to send back response to tab id as key
+  //   responseSender[sender.tab.id] = sendResponse;
+  //   console.log("responseSender", sender.tab.id);
+  //   return true; //to indicate we are sending later
+  // }
 
   if (sender.tab) {
     // if (message.click === true) {
