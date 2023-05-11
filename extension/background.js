@@ -104,9 +104,31 @@ chrome.runtime.onConnect.addListener((port) => {
   console.log('connected port', currPort);
   //Listen to messages from dev tool
   const devToolsListener = (message, port) => {
+    const injectScript = (file) => {
+      try {
+        const htmlBody = document.getElementsByTagName("body")[0];
+        const script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        script.setAttribute("src", file);
+        htmlBody.appendChild(script);
+      } catch (error) {
+        console.log("background error:", error.message);
+      }
+    };
+
+    // inject script
+    chrome.scripting
+      .executeScript({
+        target: { tabId: message.tabId },
+        function: injectScript,
+        args: [chrome.runtime.getURL("/bundles/backend.bundle.js")],
+        injectImmediately: true,
+      })
+
     console.log("msg received from dev tool: ", message);
     console.log("port ", port);
     if (message.name === "init" && message.tabId) {
+      console.log("tabID from devtol", message.tabId);
       connections[message.tabId] = port;
       connections[message.tabId].postMessage("Connected!");
     }
@@ -136,8 +158,8 @@ chrome.runtime.onConnect.addListener((port) => {
 
 // Listener for messages from contentScript.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("msg received from contentScript: ", message);
-  console.log("sender: ", sender);
+  // console.log("msg received from contentScript: ", message);
+  // console.log("sender: ", sender);
 
   // send metrics received from contentScript.js to devtools.js
   if (message.metricName && message.value) {

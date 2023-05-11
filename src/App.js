@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Box, Paper } from "@mui/material";
-import Metric from "./components/metric";
+import { Box } from "@mui/material";
+import MetricContainer from "./components/metricContainer";
+import BarChart from "./components/barChart";
 import './style.css';
 
 function App() {
@@ -49,71 +50,17 @@ function App() {
     });
   }, []);
 
+    let atBegin = Object.keys(metrics).length === 0 ? <h1>Please start analyzing your app by refreshing current page</h1> : <MetricContainer metrics={metrics}/>
     return (
+      <div>
         <ThemeProvider theme={theme}>
           <Box id='mainBox' >
-            <div id='overall-metric-container'>
-              <Paper sx={{ boxShadow: 3 }}>
-                <div className='metric-container-inner'>
-                  <Box sx={{ display: "flex", gap: 5 }}>
-                    <Metric
-                    name={"FCP"}
-                    value={180 * 50 / metrics.FCP}
-                    // value={0.9 * 100}
-                    //handleClick={handleClick}
-                    //isActive={currentMetric === "Performance"}
-                    />
-                    <Metric
-                    name={"LCP"}
-                    value={180 * 50 / metrics.LCP}
-                    // value={0.85 * 100}
-                    />
-                    <Metric
-                    name={"CLS"}
-                    value={metrics.CLS}
-                    // value={0.7 * 100}
-                    />
-                    <Metric
-                    name={"TBT"}
-                    value={metrics.TBT}
-                    // value={0.45 * 100}
-                    />
-                    <Metric
-                    name={"FID"}
-                    value={metrics.FID}
-                    // value={0.6 * 100}
-                    />
-                  </Box>
-                </div>
-              </Paper>
-            </div>
+            {atBegin}
           </Box>
         </ThemeProvider>
+        <BarChart />
+      </div>
     )
 }
 
 export default App;
-
-
-{/* <Metric
-name={"FCP"}
-value={0.9 * 100}
-//handleClick={handleClick}
-//isActive={currentMetric === "Performance"}
-/>
-<Metric
-name={"LCP"}
-value={0.85 * 100}
-/>
-<Metric
-name={"CLS"}
-value={0.7 * 100}
-/>
-<Metric
-name={"TBT"}
-value={0.45 * 100}
-/>
-<Metric
-name={"FID"}
-value={0.6 * 100}
-/> */}
