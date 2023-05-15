@@ -75,7 +75,7 @@ chrome.webRequest.onCompleted.addListener(
       networkMap[requestId] = matchedObj;
     }
 
-    console.log("networkmap:", networkMap);
+    // console.log("networkmap:", networkMap);
     //send data to dev tools each time we get new item
     sendMessageToDevTool({data: networkMap});
     
@@ -86,12 +86,12 @@ chrome.webRequest.onCompleted.addListener(
 );
 
 const sendMessageToDevTool = (msg) => {
-  console.log("port inside", currPort);
+  // console.log("port inside", currPort);
   if (currPort === undefined) {
     console.log("background.js: no port to send message to!");
     return;
   }
-  console.log("background.js sending message to dev tool:", msg);
+  // console.log("background.js sending message to dev tool:", msg);
   chrome.runtime.sendMessage({ message: msg });
 };
 
