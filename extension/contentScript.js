@@ -10,10 +10,22 @@ chrome.runtime.onMessage.addListener((msg) => {
   console.log("printing msg received from background.js: ", msg);
 });
 
-// Listener for messages from the window
-// window.addEventListener('message', e => {
-//     console.log('printing msg received from the window: ', e)
+//Listener for messages from the window
+// window.addEventListener("message", (e) => {
+//   console.log("printing msg received from the window: ", e);
 // });
+
+//This listener only cares if the window is passing an instance of the fiber tree
+window.addEventListener("message", (msg) => {
+  if (msg.data.type === "FIBER_INSTANCE") {
+    // console.log(msg.data);
+    const bgMsg = {
+      type: "FIBER_INSTANCE",
+      payload: msg.data.payload,
+    };
+    sendMsgToBackground(bgMsg);
+  }
+});
 
 // document.addEventListener("click", (event) => {
 //     sendMsgToBackground({

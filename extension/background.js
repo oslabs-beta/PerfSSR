@@ -117,13 +117,12 @@ chrome.runtime.onConnect.addListener((port) => {
     };
 
     // inject script
-    chrome.scripting
-      .executeScript({
-        target: { tabId: message.tabId },
-        function: injectScript,
-        args: [chrome.runtime.getURL("/bundles/backend.bundle.js")],
-        injectImmediately: true,
-      })
+    chrome.scripting.executeScript({
+      target: { tabId: message.tabId },
+      function: injectScript,
+      args: [chrome.runtime.getURL("/bundles/backend.bundle.js")],
+      injectImmediately: true,
+    });
 
     console.log("msg received from dev tool: ", message);
     console.log("port ", port);
@@ -158,7 +157,10 @@ chrome.runtime.onConnect.addListener((port) => {
 
 // Listener for messages from contentScript.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // console.log("msg received from contentScript: ", message);
+  console.log("msg received from contentScript: ", message);
+  //Send fiber instance to devtool.js
+  if (message.type === "FIBER_INSTANCE")
+    chrome.runtime.sendMessage({ message });
   // console.log("sender: ", sender);
 
   // send metrics received from contentScript.js to devtools.js
