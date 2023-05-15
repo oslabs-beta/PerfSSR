@@ -70,10 +70,6 @@ function App() {
     });    
   }, []);
 
-  useEffect(() => {
-    console.log("httpToggle: ", httpToggle);
-  }, [httpToggle]);
-
 
   const handleRefreshClick = () => {
     try {
@@ -94,7 +90,7 @@ function App() {
         <p className='chart-title'>Performance of HTTP Requests</p>
         <HTTPReqChart key={httpToggle} chartData={httpReq.data} label={"Network Requests Time (ms)"}/>
         </div>)
-    : (<></>)
+    : (null)
 
   let atBegin = Object.keys(metrics).length === 0 
     ? (<div>
