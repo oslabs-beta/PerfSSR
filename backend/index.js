@@ -1,5 +1,6 @@
 let devTool;
 let rootNode;
+let rdtOnCommitFiberRoot;
 
 console.log("this means the injected file is running");
 //__REACT_DEVTOOLS_GLOBAL_HOOK__ instantiation of React Dev Tools within our app
@@ -9,23 +10,60 @@ console.log("RDT instance", devTool);
 
 if (!devTool) {
   console.log(
-    "Unable to grab instance of fiber root. Are you sure Reactt Dev Tools is installed?"
+    "Unable to grab instance of fiber root. Are you sure React Dev Tools is installed?"
   );
 }
 
+// Limits calls made on a function (new render event) in a period of time
+const throttle = (func, delayMS) => {
+  let shouldWait = false;
+
+  // return function that takes new render event's fiber node arg
+  return (arg) => {
+    if (shouldWait) {
+      console.log("throttle anonymous: shouldWait is true, returning....");
+      return;
+    }
+
+    // console.log('throttle anonymous: shouldWait is false, invoking func now with arg', arg);
+    func(arg);
+    shouldWait = true;
+
+    // console.log('throttle anonymous: invoking setTimeout with delay value', delayMS);
+    setTimeout(() => {
+      // console.log('setTimeout callback invoked, setting shouldWait to false');
+      shouldWait = false;
+    }, delayMS);
+  };
+};
+
+//throttle the render
+const throttleRenderEvent = throttle((fiberNode) => {
+  updateRenderEvent(fiberNode);
+}, 100);
+
+// intercept the original onCommitFiberRoot
+const intercept = function (originalOnCommitFiberRootFn) {
+  // preserve origial onCommitFiberRoot
+  rdtOnCommitFiberRoot = originalOnCommitFiberRootFn;
+
+  return function (...args) {
+    const rdtFiberRootNode = args[1]; // root argument (args: rendererID, root, priorityLevel)
+    console.log("updated fiber node", rdtFiberRootNode);
+    // throttle renders
+    throttleRenderEvent(rdtFiberRootNode);
+    // return RDT's onCommitFiberRoot with its args
+    return originalOnCommitFiberRootFn(...args);
+  };
+};
 
 rootNode = devTool.getFiberRoots(1).values().next().value;
 console.log(rootNode);
 
-
-
-
 // ---------------------TREE
 
-
 class TreeNode {
-  constructor (fiberNode) {
-
+  constructor(fiberNode) {
     const {
       memoizedState,
       memoizedProps,
@@ -34,10 +72,11 @@ class TreeNode {
       actualDuration,
       actualStartTime,
       selfBaseDuration,
-      key
+      key,
     } = fiberNode;
 
     this.children = [];
+    this.sibling = [];
 
     /*
       - tagObj identifies the type of fiber
@@ -50,7 +89,7 @@ class TreeNode {
     this.setProps(memoizedProps);
     this.setState(memoizedState);
     this.setKey(key);
-    
+
     /*
       - The actual duration is the time spent rendering this Fiber and its descendants for the current update.
       - It includes time spent working on children.
@@ -75,38 +114,40 @@ class TreeNode {
 
   addChild(newNode) {
     if (newNode) {
-      // Don't set the parent - this causes issues when trying to invoke JSON.stringify
-      // on the ReaperSession obj.
-      //newNode.parent = this;
       this.children.push(newNode);
     }
   }
 
+  addSibling(newNode) {
+    if (newNode) this.sibling.push(newNode);
+  }
+
   setComponentName(elementType) {
     try {
-      if (elementType && Object.hasOwn(elementType, 'name')) {
+      if (elementType && Object.hasOwn(elementType, "name")) {
         // Root node will always have the hardcoded component name 'root'
-        this.componentName = this.tagObj.tagName === 'Host Root' ? 'Root' : elementType.name;
+        this.componentName =
+          this.tagObj.tagName === "Host Root" ? "Root" : elementType.name;
       } else {
-        this.componentName = '';
+        this.componentName = "";
       }
     } catch (error) {
-      console.log('tree.setComponentName error:', error.message);
+      console.log("tree.setComponentName error:", error.message);
     }
   }
 
   setTagObj(fiberTagNum) {
-    try {   
+    try {
       if (fiberTagNum !== undefined && fiberTagNum !== null) {
         this.tagObj = {
           tag: fiberTagNum,
-          tagName: getFiberNodeTagName(fiberTagNum)
-        }
+          tagName: getFiberNodeTagName(fiberTagNum),
+        };
       } else {
-        console.log('tree.setTagObj: fiberTagName is undefined!');
+        console.log("tree.setTagObj: fiberTagName is undefined!");
       }
     } catch (error) {
-      console.log('tree.setTagObj error:', error.message);
+      console.log("tree.setTagObj error:", error.message);
     }
   }
 
@@ -128,10 +169,7 @@ class TreeNode {
     // ReaPer uses this to help differentiate components for the graphs in the dashboard
     this.key = key;
   }
-
 }
-
-
 
 class Tree {
   constructor(rootFiberNode) {
@@ -141,14 +179,17 @@ class Tree {
 
   buildTree(rootFiberNode) {
     function traverse(fiberNode, parentTreeNode) {
-      const {
-        tag
-      } = fiberNode;
+      const { tag } = fiberNode;
       const tagName = getFiberNodeTagName(tag);
-
+      //console.log("current fiberNode ", fiberNode);
+      //console.log("current elementType", elementType);
       //'Function Component' || tagName === 'Class Component' ||
       let newNode;
-      if (tagName === 'Host Root' || tagName === 'Host Component') {
+      if (
+        tagName === "Host Root" ||
+        tagName === "Host Component" ||
+        tagName === "Function Component"
+      ) {
         // Create a TreeNode using the FiberNode
         newNode = new TreeNode(fiberNode);
 
@@ -167,6 +208,7 @@ class Tree {
       }
 
       // If fiberNode has a sibling, traverse to the sibling
+
       if (fiberNode.sibling) {
         traverse(fiberNode.sibling, parentTreeNode);
       }
@@ -177,100 +219,133 @@ class Tree {
 }
 
 const getFiberNodeTagName = (tagNum) => {
-  let tagName = '';
+  let tagName = "";
 
   switch (tagNum) {
     case 0:
-      tagName = 'Function Component';
+      tagName = "Function Component";
       break;
     case 1:
-      tagName = 'Class Component';
+      tagName = "Class Component";
       break;
     case 2:
-      tagName = 'Indeterminate Component';
+      tagName = "Indeterminate Component";
       break;
     case 3:
-      tagName = 'Host Root';
+      tagName = "Host Root";
       break;
     case 4:
-      tagName = 'Host Portal';
+      tagName = "Host Portal";
       break;
     case 5:
-      tagName = 'Host Component';
+      tagName = "Host Component";
       break;
     case 6:
-      tagName = 'Host Text';
+      tagName = "Host Text";
       break;
     case 7:
-      tagName = 'Fragment';
+      tagName = "Fragment";
       break;
     case 8:
-      tagName = 'Mode';
+      tagName = "Mode";
       break;
     case 9:
-      tagName = 'Context Consumer';
+      tagName = "Context Consumer";
       break;
     case 10:
-      tagName = 'Context Provider';
+      tagName = "Context Provider";
       break;
     case 11:
-      tagName = 'Forward Ref';
+      tagName = "Forward Ref";
       break;
     case 12:
-      tagName = 'Profiler';
+      tagName = "Profiler";
       break;
     case 13:
-      tagName = 'Suspense Component';
+      tagName = "Suspense Component";
       break;
     case 14:
-      tagName = 'Memo Component';
+      tagName = "Memo Component";
       break;
     case 15:
-      tagName = 'Simple Memo Component';
+      tagName = "Simple Memo Component";
       break;
     case 16:
-      tagName = 'Lazy Component';
+      tagName = "Lazy Component";
       break;
     case 17:
-      tagName = 'Incomplete Class Component';
+      tagName = "Incomplete Class Component";
       break;
     case 18:
-      tagName = 'Dehydrated Fragment';
+      tagName = "Dehydrated Fragment";
       break;
     case 19:
-      tagName = 'Suspense List Component';
+      tagName = "Suspense List Component";
       break;
     case 21:
-      tagName = 'Scope Component';
+      tagName = "Scope Component";
       break;
     case 22:
-      tagName = 'Offscreen Component';
+      tagName = "Offscreen Component";
       break;
     case 23:
-      tagName = 'Legacy Hidden Component';
+      tagName = "Legacy Hidden Component";
       break;
     case 24:
-      tagName = 'Cache Component';
+      tagName = "Cache Component";
       break;
     case 25:
-      tagName = 'Tracing Marker Component';
+      tagName = "Tracing Marker Component";
       break;
     case 26:
-      tagName = 'Host Hoistable';
+      tagName = "Host Hoistable";
       break;
     case 27:
-      tagName = 'Host Singleton';
+      tagName = "Host Singleton";
       break;
     default:
-      console.log('helperFns getFiberNodeTagName error - unrecognized tag number ', tagNum);
+      console.log(
+        "helperFns getFiberNodeTagName error - unrecognized tag number ",
+        tagNum
+      );
   }
 
   return tagName;
 };
 
+const getCircularReplacer = () => {
+  const seen = new Map();
+  return function (key, value) {
+    if (typeof value !== "object" || value === null) {
+      return value;
+    }
+    if (seen.has(value)) {
+      return "[Circular]";
+    }
+    seen.set(value, true);
+    return value;
+  };
+};
 
+// listener for everytime onCommitFiber is executed, will intercept it with monkey patching to run additional side effects
 
-const newTree = new Tree(rootNode.current)
-newTree.buildTree(rootNode.current)
+devTool.onCommitFiberRoot = intercept(devTool.onCommitFiberRoot);
 
-console.log(newTree)
+//Build the tree from root fiber node
+const newTree = new Tree(rootNode.current);
+
+console.log("built tree", newTree);
+
+//Check if the we have an instance of the tree
+//send it to the content script which will send it to background.js
+if (newTree) {
+  newTree.buildTree(rootNode.current);
+
+  window.postMessage(
+    {
+      type: "FIBER_INSTANCE",
+      payload: JSON.stringify(newTree, getCircularReplacer()),
+    },
+    "*"
+  );
+}
