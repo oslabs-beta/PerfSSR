@@ -13,6 +13,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
+    "@kurkle/color": "^0.3.2",
     "@mui/material": "^5.12.3",
     "chart.js": "^4.3.0",
     "css-loader": "^6.7.3",
