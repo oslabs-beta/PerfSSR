@@ -349,3 +349,4 @@ if (newTree) {
     "*"
   );
 }
+console.log(fiberRoot);
