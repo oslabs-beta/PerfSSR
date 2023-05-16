@@ -3,6 +3,7 @@ let currPort;
 const tabStatus = {};
 const responseSender = {};
 const networkMap = {};
+const messageQueue = [];
 
 /*
 Info neded from network request/response
@@ -157,11 +158,19 @@ chrome.runtime.onConnect.addListener((port) => {
 
 // Listener for messages from contentScript.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("msg received from contentScript: ", message);
+  // console.log("msg received from contentScript: ", message);
   //Send fiber instance to devtool.js
-  if (message.type === "FIBER_INSTANCE")
-    chrome.runtime.sendMessage({ message });
-  // console.log("sender: ", sender);
+  if (message.type === "FIBER_INSTANCE") {
+    console.log("Sending FIBER_INSTANCE message to App.js:", message);
+    chrome.runtime.sendMessage(message);
+    // Add the message to the queue
+    messageQueue.push(message);
+  }
+
+  if (message.type === "GET_MESSAGE_FROM_QUEUE") {
+    const message = messageQueue.shift(); // Retrieve the first message from the queue
+    sendResponse(message); // Send the message back to the component
+  }
 
   // send metrics received from contentScript.js to devtools.js
   if (message.metricName && message.value) {

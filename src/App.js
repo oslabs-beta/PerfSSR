@@ -3,6 +3,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Box } from "@mui/material";
 import MetricContainer from "./components/metricContainer";
 import HTTPReqChart from "./components/HTTPReqChart";
+import ComponentChart from "./components/componentChart";
 import BarChart from "./components/barChart";
 import HorizontalBar from "./components/horizontalBar";
 import './style.css';
@@ -42,10 +43,28 @@ function App() {
   const [metrics, setMetrics] = useState({});
   const [httpReq, setHttpReq] = useState({data: {}});
   const [httpToggle, setHttpToggle] = useState(false);
+  const [fiberTree, setFiberTree] = useState();
+
+  useEffect(() => {
+    const getMessageFromQueue = () => {
+      chrome.runtime.sendMessage({ type: "GET_MESSAGE_FROM_QUEUE" }, (message) => {
+        if (message) {
+          // Process the message retrieved from the queue
+          console.log("Message from queue:", message);
+          setFiberTree(JSON.parse(message.payload));
+        }
+      });
+    };
+    getMessageFromQueue();
+  }, []);
+
+  useEffect(() => {
+    console.log("fiberTree: ", fiberTree)
+  }, [fiberTree])
 
   useEffect(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      
+
       setMetrics((prevMetrics) => {
         return {
           ...prevMetrics,
@@ -56,10 +75,8 @@ function App() {
       setHttpReq((prevHttpReq) => {
         if (message.message && message.message.data) {
           if (Object.keys(message.message.data).length !== Object.keys(prevHttpReq.data).length) {            
-            console.log('received data: ', message.message.data)
-            console.log('prevHttpReq.data: ', prevHttpReq.data)
-            // const newHttpReq = {...prevHttpReq};
-            // newHttpReq.data = message.message.data;
+            // console.log('received data: ', message.message.data)
+            // console.log('prevHttpReq.data: ', prevHttpReq.data)
             const newHttpReq = {data: message.message.data};
             setHttpToggle(true);
             return newHttpReq;
@@ -111,7 +128,7 @@ function App() {
         </ThemeProvider>
         {showHTTP}
         <p className='chart-title'>Server Side Components Rendering Times</p>
-        <BarChart />
+        <ComponentChart chartData={fiberTree} label={"Rendering Time (100ms)"}/>
         <p className='chart-title'>Client Side Components Rendering Times</p>
         <BarChart />
         <p className='chart-title'>Components Rendering Time Benchmarking</p>
