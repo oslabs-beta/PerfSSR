@@ -1,6 +1,9 @@
 import './globals.css';
 import Header from './components/Header';
 import { Poppins } from 'next/font/google';
+import { patchfetchServerResponse } from 'src/perfssr/fetch-lib';
+
+fetch = patchfetchServerResponse(fetch);
 
 const poppins = Poppins({ 
   weight: ['400', '700'],
