@@ -209,3 +209,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // }
   }
 });
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete') {
+    for (let variableKey in networkMap){
+      if (networkMap.hasOwnProperty(variableKey)){
+          delete networkMap[variableKey];
+      }
+    }
+    sendMessageToDevTool({data: networkMap});
+    // Do something when the tab has been reloaded
+  }
+});
+
+// chrome.runtime.onConnect.addListener(() => {
+//   console.log('tabStatus: ', tabStatus);
+//   if(tabStatus === 'loading') sendMessageToDevTool({data: {}});
+// }
+// () => {
+//   if(networkMap !== {}){
+//     console.log('I am updating')
+//     sendMessageToDevTool({data: {}});
+//   }
+//   else{
+//     return;
+//   }
+// },
+// { urls: ["http://localhost:3000/*"] },
+//   //Add the response headers to the result of the callback
+//   ["responseHeaders"]
+// );
