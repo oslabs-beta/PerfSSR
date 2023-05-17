@@ -41,11 +41,36 @@ const throttle = (func, delayMS) => {
 };
 
 // intercept the original onCommitFiberRoot
+// const intercept = function (originalOnCommitFiberRootFn) {
+//   // preserve origial onCommitFiberRoot
+//   rdtOnCommitFiberRoot = originalOnCommitFiberRootFn;
+
+//   return function (...args) {
+//     const rdtFiberRootNode = args[1]; // root argument (args: rendererID, root, priorityLevel)
+
+//     if (rdtFiberRootNode) {
+//       const updatedTree = new Tree(rdtFiberRootNode.current);
+//       updatedTree.buildTree(rdtFiberRootNode.current);
+//       window.postMessage(
+//         {
+//           type: "UPDATED_FIBER",
+//           payload: JSON.stringify(updatedTree, getCircularReplacer()),
+//         },
+//         "*"
+//       );
+//     }
+//     return originalOnCommitFiberRootFn(...args);
+//   };
+// };
+
 const intercept = function (originalOnCommitFiberRootFn) {
-  // preserve origial onCommitFiberRoot
+  // preserve original onCommitFiberRoot
   rdtOnCommitFiberRoot = originalOnCommitFiberRootFn;
 
-  return function (...args) {
+  let isThrottled = false;
+  let queuedArgs = null;
+
+  const executeFunction = (...args) => {
     const rdtFiberRootNode = args[1]; // root argument (args: rendererID, root, priorityLevel)
 
     if (rdtFiberRootNode) {
@@ -59,7 +84,25 @@ const intercept = function (originalOnCommitFiberRootFn) {
         "*"
       );
     }
-    return originalOnCommitFiberRootFn(...args);
+
+    originalOnCommitFiberRootFn(...args);
+
+    isThrottled = false;
+
+    if (queuedArgs) {
+      const nextArgs = queuedArgs;
+      queuedArgs = null;
+      executeFunction(...nextArgs);
+    }
+  };
+
+  return function (...args) {
+    if (!isThrottled) {
+      isThrottled = true;
+      executeFunction(...args);
+    } else {
+      queuedArgs = args;
+    }
   };
 };
 
