@@ -1,0 +1,5 @@
+{
+  "/code/repos/page": "app/code/repos/page.js",
+  "/code/repos/[name]/page": "app/code/repos/[name]/page.js",
+  "/page": "app/page.js"
+}
