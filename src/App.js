@@ -3,9 +3,9 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Box } from "@mui/material";
 import MetricContainer from "./components/metricContainer";
 import HTTPReqChart from "./components/HTTPReqChart";
-import ComponentChart from "./components/componentChart";
-import BarChart from "./components/barChart";
-import HorizontalBar from "./components/horizontalBar";
+import ServerComponent from "./components/serverComponent";
+import ClientComponent from "./components/clientComponent";
+import BenchmarkTime from "./components/benchmarkTime";
 import './style.css';
 
 function App() {
@@ -76,12 +76,11 @@ function App() {
         if (message.message && message.message.data) {
           if (Object.keys(message.message.data).length !== Object.keys(prevHttpReq.data).length) {            
             // console.log('received data: ', message.message.data)
-            // console.log('prevHttpReq.data: ', prevHttpReq.data)
             const newHttpReq = {data: message.message.data};
             setHttpToggle(true);
             return newHttpReq;
           }
-        }
+        } else {setHttpToggle(false);}
         return prevHttpReq;
       })
     });    
@@ -100,6 +99,7 @@ function App() {
 
   useEffect(() => {
     if (Object.keys(httpReq.data).length !== 0) setHttpToggle(true);
+    else setHttpToggle(false);
   }, [httpReq])
 
   let showHTTP = httpToggle
@@ -128,11 +128,11 @@ function App() {
         </ThemeProvider>
         {showHTTP}
         <p className='chart-title'>Server Side Components Rendering Times</p>
-        <ComponentChart chartData={fiberTree} label={"Rendering Time (100ms)"}/>
+        <ServerComponent chartData={fiberTree} label={"Rendering Time (100ms)"}/>
         <p className='chart-title'>Client Side Components Rendering Times</p>
-        <BarChart />
+        <ClientComponent chartData={fiberTree} label={"Rendering Time (100ms)"}/>
         <p className='chart-title'>Components Rendering Time Benchmarking</p>
-        <HorizontalBar />
+        <BenchmarkTime chartData={fiberTree} label={"Rendering Time Compared with Average (+/- times faster/slower)"}/>
        </div>)
 
   return (

@@ -228,5 +228,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }
     sendMessageToDevTool({data: networkMap});
     // Do something when the tab has been reloaded
+
+    // Send a message to the contentScript that new performance data is needed
+    chrome.tabs.sendMessage(tabId, {message: "TabUpdated"});
   }
 });
