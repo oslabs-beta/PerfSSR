@@ -8,6 +8,9 @@ console.log("this means the injected file is running");
 devTool = window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
 console.log("RDT instance", devTool);
 
+rootNode = devTool.getFiberRoots(1).values().next().value;
+console.log(rootNode);
+
 if (!devTool) {
   console.log(
     "Unable to grab instance of fiber root. Are you sure React Dev Tools is installed?"
@@ -37,28 +40,71 @@ const throttle = (func, delayMS) => {
   };
 };
 
-//throttle the render
-const throttleRenderEvent = throttle((fiberNode) => {
-  updateRenderEvent(fiberNode);
-}, 100);
-
 // intercept the original onCommitFiberRoot
+// const intercept = function (originalOnCommitFiberRootFn) {
+//   // preserve origial onCommitFiberRoot
+//   rdtOnCommitFiberRoot = originalOnCommitFiberRootFn;
+
+//   return function (...args) {
+//     const rdtFiberRootNode = args[1]; // root argument (args: rendererID, root, priorityLevel)
+
+//     if (rdtFiberRootNode) {
+//       const updatedTree = new Tree(rdtFiberRootNode.current);
+//       updatedTree.buildTree(rdtFiberRootNode.current);
+//       window.postMessage(
+//         {
+//           type: "UPDATED_FIBER",
+//           payload: JSON.stringify(updatedTree, getCircularReplacer()),
+//         },
+//         "*"
+//       );
+//     }
+//     return originalOnCommitFiberRootFn(...args);
+//   };
+// };
+
 const intercept = function (originalOnCommitFiberRootFn) {
-  // preserve origial onCommitFiberRoot
+  // preserve original onCommitFiberRoot
   rdtOnCommitFiberRoot = originalOnCommitFiberRootFn;
 
-  return function (...args) {
+  let isThrottled = false;
+  let queuedArgs = null;
+
+  const executeFunction = (...args) => {
     const rdtFiberRootNode = args[1]; // root argument (args: rendererID, root, priorityLevel)
-    console.log("updated fiber node", rdtFiberRootNode);
-    // throttle renders
-    throttleRenderEvent(rdtFiberRootNode);
-    // return RDT's onCommitFiberRoot with its args
-    return originalOnCommitFiberRootFn(...args);
+
+    if (rdtFiberRootNode) {
+      const updatedTree = new Tree(rdtFiberRootNode.current);
+      updatedTree.buildTree(rdtFiberRootNode.current);
+      window.postMessage(
+        {
+          type: "UPDATED_FIBER",
+          payload: JSON.stringify(updatedTree, getCircularReplacer()),
+        },
+        "*"
+      );
+    }
+
+    originalOnCommitFiberRootFn(...args);
+
+    isThrottled = false;
+
+    if (queuedArgs) {
+      const nextArgs = queuedArgs;
+      queuedArgs = null;
+      executeFunction(...nextArgs);
+    }
+  };
+
+  return function (...args) {
+    if (!isThrottled) {
+      isThrottled = true;
+      executeFunction(...args);
+    } else {
+      queuedArgs = args;
+    }
   };
 };
-
-rootNode = devTool.getFiberRoots(1).values().next().value;
-console.log(rootNode);
 
 // ---------------------TREE
 
@@ -76,7 +122,6 @@ class TreeNode {
     } = fiberNode;
 
     this.children = [];
-    this.sibling = [];
 
     /*
       - tagObj identifies the type of fiber
@@ -349,4 +394,4 @@ if (newTree) {
     "*"
   );
 }
-console.log(fiberRoot);
+// console.log(fiberRoot);

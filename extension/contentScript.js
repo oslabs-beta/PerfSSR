@@ -21,10 +21,10 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 //This listener only cares if the window is passing an instance of the fiber tree
 window.addEventListener("message", (msg) => {
-  if (msg.data.type === "FIBER_INSTANCE") {
+  if (msg.data.type === "FIBER_INSTANCE" || msg.data.type === "UPDATED_FIBER") {
     // console.log(msg.data);
     const bgMsg = {
-      type: "FIBER_INSTANCE",
+      type: msg.data.type,
       payload: msg.data.payload,
     };
     sendMsgToBackground(bgMsg);
