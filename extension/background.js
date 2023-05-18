@@ -3,6 +3,7 @@ let currPort;
 const tabStatus = {};
 const responseSender = {};
 const networkMap = {};
+const messageQueue = [];
 
 /*
 Info neded from network request/response
@@ -33,7 +34,7 @@ chrome.webRequest.onBeforeRequest.addListener(
     //console.log("Request started: ", details);
 
     //before request, set tabStatus to loading to track content status
-    tabStatus[details.tabId] = 'loading';
+    tabStatus[details.tabId] = "loading";
   },
   { urls: ["http://localhost:3000/*"] },
   ["extraHeaders", "requestBody"]
@@ -67,7 +68,7 @@ chrome.webRequest.onCompleted.addListener(
     const { requestId } = details;
 
     //onComplete, we know request is done so set tabStatus to complete
-    tabStatus[details.tabId] = 'complete';
+    tabStatus[details.tabId] = "complete";
 
     if (networkMap[requestId]) {
       const matchedObj = networkMap[requestId];
@@ -77,8 +78,7 @@ chrome.webRequest.onCompleted.addListener(
 
     // console.log("networkmap:", networkMap);
     //send data to dev tools each time we get new item
-    sendMessageToDevTool({data: networkMap});
-    
+    sendMessageToDevTool({ data: networkMap });
   },
   { urls: ["http://localhost:3000/*"] },
   //Add the response headers to the result of the callback
@@ -95,27 +95,13 @@ const sendMessageToDevTool = (msg) => {
   chrome.runtime.sendMessage({ message: msg });
 };
 
-
 // Establish connection with dev tool
 // will not fire until chrome.runtime.connect is invoked
 chrome.runtime.onConnect.addListener((port) => {
-  
   currPort = port;
-  console.log('connected port', currPort);
+  console.log("connected port", currPort);
   //Listen to messages from dev tool
   const devToolsListener = (message, port) => {
-    const injectScript = (file) => {
-      try {
-        const htmlBody = document.getElementsByTagName("body")[0];
-        const script = document.createElement("script");
-        script.setAttribute("type", "text/javascript");
-        script.setAttribute("src", file);
-        htmlBody.appendChild(script);
-      } catch (error) {
-        console.log("background error:", error.message);
-      }
-    };
-
     // inject script
     chrome.scripting.executeScript({
       target: { tabId: message.tabId },
@@ -157,11 +143,20 @@ chrome.runtime.onConnect.addListener((port) => {
 
 // Listener for messages from contentScript.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("msg received from contentScript: ", message);
+  // console.log("msg received from contentScript: ", message);
   //Send fiber instance to devtool.js
-  if (message.type === "FIBER_INSTANCE")
-    chrome.runtime.sendMessage({ message });
-  // console.log("sender: ", sender);
+  if (message.type === "UPDATED_FIBER" || message.type === "FIBER_INSTANCE") {
+    console.log(message);
+    console.log(`Sending ${message.type} message to App.js:`, message);
+    chrome.runtime.sendMessage(message);
+    // Add the message to the queue
+    messageQueue.push(message);
+  }
+
+  if (message.type === "GET_MESSAGE_FROM_QUEUE") {
+    const message = messageQueue.shift(); // Retrieve the first message from the queue
+    sendResponse(message); // Send the message back to the component
+  }
 
   // send metrics received from contentScript.js to devtools.js
   if (message.metricName && message.value) {
@@ -209,3 +204,38 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // }
   }
 });
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete") {
+    // //reinject script on reload
+    // chrome.scripting.executeScript({
+    //   target: { tabId },
+    //   function: injectScript,
+    //   args: [chrome.runtime.getURL("/bundles/backend.bundle.js")],
+    //   injectImmediately: true,
+    // });
+
+    for (let variableKey in networkMap) {
+      if (networkMap.hasOwnProperty(variableKey)) {
+        delete networkMap[variableKey];
+      }
+    }
+    sendMessageToDevTool({ data: networkMap });
+    // Do something when the tab has been reloaded
+
+    // Send a message to the contentScript that new performance data is needed
+    chrome.tabs.sendMessage(tabId, {message: "TabUpdated"});
+  }
+});
+
+const injectScript = (file) => {
+  try {
+    const htmlBody = document.getElementsByTagName("body")[0];
+    const script = document.createElement("script");
+    script.setAttribute("type", "text/javascript");
+    script.setAttribute("src", file);
+    htmlBody.appendChild(script);
+  } catch (error) {
+    console.log("background error:", error.message);
+  }
+};

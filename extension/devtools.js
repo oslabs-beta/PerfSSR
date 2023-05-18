@@ -37,6 +37,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         data: message.data,
         }, '*');
     }
+
+    // send fiber instance to App.js
+    if (message.type === "FIBER_INSTANCE") {
+      // console.log("fiber isntance!!: ", message)
+      window.postMessage({
+        type: 'FIBER_INSTANCE',
+        payload: message.payload,
+      }, '*');      
+    }
 });
 
 // Create a connection to the background service worker
