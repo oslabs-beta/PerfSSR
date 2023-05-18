@@ -175,6 +175,10 @@ class TreeNode {
         // Root node will always have the hardcoded component name 'root'
         this.componentName =
           this.tagObj.tagName === "Host Root" ? "Root" : elementType.name;
+      } else if (elementType && Object.hasOwn(elementType, "_payload")) {
+          if (Object.hasOwn(elementType._payload, "value") && Object.hasOwn(elementType._payload.value, "name")) {
+            this.componentName = this.tagObj.tagName = elementType._payload.value.name;
+          }
       } else {
         this.componentName = "";
       }
