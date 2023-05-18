@@ -15,7 +15,7 @@ const HomePage = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setShowPage(true);
-    }, 200); // 3000 milliseconds = 3 seconds
+    }, 1000); // 3000 milliseconds = 3 seconds
 
     return () => {
       clearTimeout(timeout); // Clean up the timeout when the component unmounts

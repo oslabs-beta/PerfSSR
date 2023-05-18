@@ -40,6 +40,7 @@ const HTTPReqChart = (props) => {
           {
             label: props.label,
             data: inputData.map((row) => row.time),
+            backgroundColor: '#ff6384',
           },
         ],
       },

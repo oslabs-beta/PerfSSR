@@ -10,7 +10,7 @@ const ClientComponent = (props) => {
   const notThese = [
         "InnerLayoutRouter", "RedirectBoundary", "NotFoundBoundary",
         "LoadingBoundary", "ErrorBoundary", "HotReload", "Router",
-        "ServerRoot", "RSCComponent", "Root", "Courses", "Course"
+        "ServerRoot", "RSCComponent", "Root", "ThrottledComponent"
         ];
 
   const convertTreeToChart = (tree) => {
@@ -21,7 +21,8 @@ const ClientComponent = (props) => {
         while (q.length > 0) {
             const node = q.shift();
             // Only keep nodes that are funtion components and with a component name
-            if (node.tagObj.tag === 0 && node.componentName !== "" && !notThese.includes(node.componentName)) {
+            // client components also use Hooks
+            if (node.tagObj.tag === 0 && node.componentName !== "" && !notThese.includes(node.componentName) && node._debugHookTypes !== null) {
                 if (node.renderDurationMS === 0) 
                    inputData.push({componentName: node.componentName, 
                      time: Number((node.selfBaseDuration * 100))
@@ -56,6 +57,7 @@ const ClientComponent = (props) => {
           {
             label: props.label,
             data: inputData.map((row) => row.time),
+            backgroundColor: '#ff6384',
           },
         ],
       },
