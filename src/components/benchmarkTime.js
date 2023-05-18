@@ -20,13 +20,13 @@ const BenchmarkTime = (props) => {
   const notThese = [
         "InnerLayoutRouter", "RedirectBoundary", "NotFoundBoundary",
         "LoadingBoundary", "ErrorBoundary", "HotReload", "Router",
-        "ServerRoot", "RSCComponent", "Root"
+        "ServerRoot", "RSCComponent", "Root", "ThrottledComponent"
         ];
 
   const convertTreeToChart = (tree) => {
     
     const processBenchmarking = (t) => {
-        const avg = 11;
+        const avg = 22;
         let result;
         result = t < avg ? (avg/t) : -(t/avg)
         return result.toFixed(2);

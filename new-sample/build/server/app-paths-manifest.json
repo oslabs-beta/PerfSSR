@@ -1,5 +1,7 @@
 {
-  "/code/repos/page": "app/code/repos/page.js",
-  "/code/repos/[name]/page": "app/code/repos/[name]/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/api/courses/route": "app/api/courses/route.js",
+  "/about/team/page": "app/about/team/page.js",
+  "/about/page": "app/about/page.js",
+  "/code/repos/page": "app/code/repos/page.js"
 }

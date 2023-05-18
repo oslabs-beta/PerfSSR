@@ -83,6 +83,14 @@ function App() {
         } else {setHttpToggle(false);}
         return prevHttpReq;
       })
+
+      setFiberTree((prevFiberTree) => {
+        if (message.type === "UPDATED_FIBER" || message.type === "FIBER_INSTANCE") {
+          console.log("UPDATED_FIBER received: ", message)
+          return JSON.parse(message.payload)
+        }
+        return prevFiberTree;
+      })
     });    
   }, []);
 

@@ -119,6 +119,7 @@ class TreeNode {
       actualStartTime,
       selfBaseDuration,
       key,
+      _debugHookTypes,
     } = fiberNode;
 
     this.children = [];
@@ -134,6 +135,7 @@ class TreeNode {
     this.setProps(memoizedProps);
     this.setState(memoizedState);
     this.setKey(key);
+    this.setHookTypes(_debugHookTypes);
 
     /*
       - The actual duration is the time spent rendering this Fiber and its descendants for the current update.
@@ -213,6 +215,10 @@ class TreeNode {
     // of the same type
     // ReaPer uses this to help differentiate components for the graphs in the dashboard
     this.key = key;
+  }
+
+  setHookTypes(_debugHookTypes) {
+    this._debugHookTypes = _debugHookTypes;
   }
 }
 

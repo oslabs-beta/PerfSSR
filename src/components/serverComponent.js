@@ -10,7 +10,7 @@ const ServerComponent = (props) => {
   const notThese = [
         "InnerLayoutRouter", "RedirectBoundary", "NotFoundBoundary",
         "LoadingBoundary", "ErrorBoundary", "HotReload", "Router",
-        "ServerRoot", "RSCComponent", "Root", "CourseSearch"
+        "ServerRoot", "RSCComponent", "Root", "ThrottledComponent"
         ];
 
   const convertTreeToChart = (tree) => {
@@ -21,7 +21,7 @@ const ServerComponent = (props) => {
         while (q.length > 0) {
             const node = q.shift();
             // Only keep nodes that are funtion components and with a component name
-            if (node.tagObj.tag === 0 && node.componentName !== "" && !notThese.includes(node.componentName)) {
+            if (node.tagObj.tag === 0 && node.componentName !== "" && !notThese.includes(node.componentName) && node._debugHookTypes === null) {
                 if (node.renderDurationMS === 0) 
                    inputData.push({componentName: node.componentName, 
                      time: Number((node.selfBaseDuration * 100))
