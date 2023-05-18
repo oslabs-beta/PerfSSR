@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "perfssr": "node --require ./fetch-timer ./node_modules/.bin/next dev"
   },
   "dependencies": {
     "autoprefixer": "10.4.14",
