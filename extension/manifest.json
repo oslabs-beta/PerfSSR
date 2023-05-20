@@ -11,7 +11,7 @@
   "version_name": "1.0 beta",
 
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "bundles/background.bundle.js"
   },
 
   "permissions": ["tabs", "activeTab", "webRequest", "scripting"],
@@ -20,7 +20,7 @@
   "content_scripts": [
     {
       "matches": ["http://localhost:3000/*"],
-      "js": ["contentScript.js"]
+      "js": ["bundles/contentScript.bundle.js"]
     }
   ],
 
