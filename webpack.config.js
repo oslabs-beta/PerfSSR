@@ -7,6 +7,9 @@ module.exports = (env) => {
     entry: {
       index: path.resolve(__dirname, "./src/index.js"),
       backend: "./backend/index.js",
+      contentScript: "./extension/contentScript.ts",
+      background: "./extension/background.ts",
+      devtools: "./extension/devtools.ts",
     },
     output: {
       path: path.join(__dirname, "./dist/bundles"),
@@ -47,11 +50,16 @@ module.exports = (env) => {
           exclude: /node_modules/,
           use: ["style-loader", "css-loader"],
         },
+        {
+          test: /\.tsx?$/,
+          use: 'ts-loader',
+          exclude: /node_modules/,
+        },
       ],
     },
     resolve: {
       // Enable importing JS / JSX files without specifying their extension
-      extensions: [".js", ".jsx"],
+      extensions: ['.jsx', '.js', '.tsx', '.ts'],
     },
   };
 };
