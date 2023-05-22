@@ -207,7 +207,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
-    // //reinject script on reload
+    //reinject script on reload
     // chrome.scripting.executeScript({
     //   target: { tabId },
     //   function: injectScript,
@@ -224,7 +224,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     // Do something when the tab has been reloaded
 
     // Send a message to the contentScript that new performance data is needed
-    chrome.tabs.sendMessage(tabId, {message: "TabUpdated"});
+    chrome.tabs.sendMessage(tabId, { message: "TabUpdated" });
   }
 });
 

@@ -40,69 +40,30 @@ const throttle = (func, delayMS) => {
   };
 };
 
-// intercept the original onCommitFiberRoot
-// const intercept = function (originalOnCommitFiberRootFn) {
-//   // preserve origial onCommitFiberRoot
-//   rdtOnCommitFiberRoot = originalOnCommitFiberRootFn;
+//Execute throttle on new updated fiber root
+const throttleUpdatedFiberTree = throttle(function (updatedFiberNode) {
+  const updatedTree = new Tree(updatedFiberNode.current);
+  updatedTree.buildTree(updatedFiberNode.current);
+  window.postMessage(
+    {
+      type: "UPDATED_FIBER",
+      payload: JSON.stringify(updatedTree, getCircularReplacer()),
+    },
+    "*"
+  );
+}, 500);
 
-//   return function (...args) {
-//     const rdtFiberRootNode = args[1]; // root argument (args: rendererID, root, priorityLevel)
-
-//     if (rdtFiberRootNode) {
-//       const updatedTree = new Tree(rdtFiberRootNode.current);
-//       updatedTree.buildTree(rdtFiberRootNode.current);
-//       window.postMessage(
-//         {
-//           type: "UPDATED_FIBER",
-//           payload: JSON.stringify(updatedTree, getCircularReplacer()),
-//         },
-//         "*"
-//       );
-//     }
-//     return originalOnCommitFiberRootFn(...args);
-//   };
-// };
-
+//intercept the original onCommitFiberRoot
 const intercept = function (originalOnCommitFiberRootFn) {
-  // preserve original onCommitFiberRoot
+  // preserve origial onCommitFiberRoot
   rdtOnCommitFiberRoot = originalOnCommitFiberRootFn;
 
-  let isThrottled = false;
-  let queuedArgs = null;
-
-  const executeFunction = (...args) => {
-    const rdtFiberRootNode = args[1]; // root argument (args: rendererID, root, priorityLevel)
-
-    if (rdtFiberRootNode) {
-      const updatedTree = new Tree(rdtFiberRootNode.current);
-      updatedTree.buildTree(rdtFiberRootNode.current);
-      window.postMessage(
-        {
-          type: "UPDATED_FIBER",
-          payload: JSON.stringify(updatedTree, getCircularReplacer()),
-        },
-        "*"
-      );
-    }
-
-    originalOnCommitFiberRootFn(...args);
-
-    isThrottled = false;
-
-    if (queuedArgs) {
-      const nextArgs = queuedArgs;
-      queuedArgs = null;
-      executeFunction(...nextArgs);
-    }
-  };
-
   return function (...args) {
-    if (!isThrottled) {
-      isThrottled = true;
-      executeFunction(...args);
-    } else {
-      queuedArgs = args;
+    const rdtFiberRootNode = args[1]; // root a rgument (args: rendererID, root, priorityLevel)
+    if (rdtFiberRootNode) {
+      throttleUpdatedFiberTree(rdtFiberRootNode);
     }
+    return originalOnCommitFiberRootFn(...args);
   };
 };
 
@@ -176,9 +137,13 @@ class TreeNode {
         this.componentName =
           this.tagObj.tagName === "Host Root" ? "Root" : elementType.name;
       } else if (elementType && Object.hasOwn(elementType, "_payload")) {
-          if (Object.hasOwn(elementType._payload, "value") && Object.hasOwn(elementType._payload.value, "name")) {
-            this.componentName = this.tagObj.tagName = elementType._payload.value.name;
-          }
+        if (
+          Object.hasOwn(elementType._payload, "value") &&
+          Object.hasOwn(elementType._payload.value, "name")
+        ) {
+          this.componentName = this.tagObj.tagName =
+            elementType._payload.value.name;
+        }
       } else {
         this.componentName = "";
       }
