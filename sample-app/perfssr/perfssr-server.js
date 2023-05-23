@@ -1,9 +1,15 @@
 const http = require("http");
 const perfssr = require('../fetch-timer.js');
 const { install } = perfssr;
-install();
+install(handleFetch);
 
 
+function handleFetch(data) {
+    console.log("handleFetch", data);
+    perfSSRData3 = data;
+}
+
+let perfSSRData3 = {};
 
 // replace this with websocket if you want to have a continuous line of communication
 const perfssrServer = http.createServer((req, res) => {
@@ -25,8 +31,10 @@ const perfssrServer = http.createServer((req, res) => {
       res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
       res.setHeader('Access-Control-Max-Age', 2592000); // 30 days
     res.setHeader('Content-Type', 'application/json');
-    console.log("data", perfssr.perfSSRData);
-    res.end(JSON.stringify(perfssr.perfSSRData));
+    console.log("data", perfssr);
+    console.log("globalthis", globalThis);
+    console.log("callback data", perfSSRData3);
+    res.end(JSON.stringify(perfssr.perfSSRData2));
 });
 
 const PORT = 5055;
