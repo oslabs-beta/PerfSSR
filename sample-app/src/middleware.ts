@@ -1,4 +1,5 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextFetchEvent, NextRequest } from 'next/server';
 
 export const config = {
     matcher: [
@@ -13,7 +14,7 @@ export const config = {
     ],
   };
 
-export function middleware(req: NextRequest) {
+export function middleware(req: NextRequest, ev: NextFetchEvent) {
     console.log("middleware", req.nextUrl.pathname);
     // console.log("is this working middle?");
     return NextResponse.next();
