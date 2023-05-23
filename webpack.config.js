@@ -6,7 +6,7 @@ module.exports = (env) => {
   return {
     entry: {
       index: path.resolve(__dirname, "./src/index.js"),
-      backend: "./backend/index.js",
+      backend: "./backend/index.ts",
       contentScript: "./extension/contentScript.ts",
       background: "./extension/background.ts",
       devtools: "./extension/devtools.ts",
