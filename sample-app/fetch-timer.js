@@ -36,15 +36,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uninstall = exports.install = void 0;
+exports.uninstall = exports.install = exports.perfSSRData2 = void 0;
 var originalFetch = globalThis.fetch;
-var perfSSRFetch = function (originFetch) {
+// const nextBuiltInPatchFetch = require("next/src/server/lib/patch-fetch");
+// console.log(nextBuiltInPatchFetch);
+// console.log(nextBuiltInPatchFetch.patchFetch);
+var perfSSRFetch = function (originFetch, fetchCallback) {
+    globalThis.perfSSRData = { data: [] };
     return function (input, init) {
         return __awaiter(this, void 0, void 0, function () {
-            var reqStart, timeStart, res, reqEnd, timeEnd, durationStr;
+            var reqStart, timeStart, res, reqEnd, timeEnd, durationStr, timingData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        console.log("inside patched fetch");
                         reqStart = performance.now(), timeStart = new Date();
                         performance.mark("fetchStart:".concat(input));
                         return [4 /*yield*/, originFetch(input)];
@@ -57,14 +62,31 @@ var perfSSRFetch = function (originFetch) {
                         console.log("timeStart", timeStart.toISOString());
                         console.log("timeEnd", timeEnd.toISOString());
                         console.log("time fetch took:", durationStr);
+                        timingData = {
+                            start: timeStart.toISOString(),
+                            end: timeEnd.toISOString(),
+                            url: input,
+                            duration: durationStr
+                        };
+                        console.log(timingData);
+                        // fetchCallback(timingData);
+                        exports.perfSSRData2 = timingData;
+                        globalThis.perfSSRData['data'].push({ timingData: timingData });
+                        fetch.isPatched = true;
                         return [2 /*return*/, res];
                 }
             });
         });
     };
 };
-var install = function (patchFunc) {
-    globalThis.fetch = patchFunc !== null && patchFunc !== void 0 ? patchFunc : perfSSRFetch(globalThis.fetch);
+var install = function (fetchCallback, patchFunc) {
+    if (fetch.isPatched !== true) {
+        globalThis.fetch = patchFunc !== null && patchFunc !== void 0 ? patchFunc : perfSSRFetch(globalThis.fetch, fetchCallback);
+        console.log("installed!");
+    }
+    else {
+        console.log("already installed");
+    }
 };
 exports.install = install;
 var uninstall = function () {
@@ -73,4 +95,4 @@ var uninstall = function () {
 exports.uninstall = uninstall;
 // Monkey patching immediately on package load
 // globalThis.fetch = perfSSRFetch(globalThis.fetch);
-(0, exports.install)();
+// install();
