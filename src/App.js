@@ -114,19 +114,17 @@ function App() {
   }, []);
 
   const initializeSocket = async () => {
-    const socket = await io("http://localhost:3001/");
-    socket.on("connect", () => {
-      console.log("socket connected", socket.id);
-    });
-
-    socket.on("message", (msg) => {
-      console.log("message received from socket", msg);
-      console.log(JSON.parse(nsg));
-    });
-
-    socket.on("connection-established", (args) => {
-      console.log("socket message", args);
-    });
+    // const socket = await io("http://localhost:4000");
+    // socket.on("connect", () => {
+    //   console.log("socket connected", socket.id);
+    // });
+    // socket.on("message", (msg) => {
+    //   console.log("message received from socket", msg);
+    //   console.log(JSON.parse(nsg));
+    // });
+    // socket.on("connection-established", (args) => {
+    //   console.log("socket message", args);
+    // });
   };
 
   const handleRefreshClick = () => {
