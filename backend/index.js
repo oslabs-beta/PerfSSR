@@ -1,6 +1,28 @@
 let devTool;
 let rootNode;
 let rdtOnCommitFiberRoot;
+let updatedFiberTree;
+
+// Listen for clicks
+let url = location.href;
+window.addEventListener(
+  "click",
+  () => {
+    requestAnimationFrame(() => {
+      if (url !== location.href && updatedFiberTree) {
+        window.postMessage(
+          {
+            type: "UPDATED_FIBER",
+            payload: JSON.stringify(updatedFiberTree, getCircularReplacer()),
+          },
+          "*"
+        );
+        url = location.href;
+      }
+    });
+  },
+  true
+);
 
 console.log("this means the injected file is running");
 //__REACT_DEVTOOLS_GLOBAL_HOOK__ instantiation of React Dev Tools within our app
@@ -42,15 +64,8 @@ const throttle = (func, delayMS) => {
 
 //Execute throttle on new updated fiber root
 const throttleUpdatedFiberTree = throttle(function (updatedFiberNode) {
-  const updatedTree = new Tree(updatedFiberNode.current);
-  updatedTree.buildTree(updatedFiberNode.current);
-  window.postMessage(
-    {
-      type: "UPDATED_FIBER",
-      payload: JSON.stringify(updatedTree, getCircularReplacer()),
-    },
-    "*"
-  );
+  updatedFiberTree = new Tree(updatedFiberNode.current);
+  updatedFiberTree.buildTree(updatedFiberNode.current);
 }, 500);
 
 //intercept the original onCommitFiberRoot
