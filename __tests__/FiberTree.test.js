@@ -1,6 +1,5 @@
 const { Tree } = require('../backend/fiberTree.ts');
-const FiberNode = require('../testing files/FiberNode.js');
-const rebuiltTree = require('../testing files/RebuiltTree.js');
+const FiberNode = require('../testing-files/FiberNode.js');
 
 const treeInstance = new Tree(FiberNode);
 

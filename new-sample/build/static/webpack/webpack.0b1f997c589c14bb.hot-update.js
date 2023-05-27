@@ -83,7 +83,7 @@ self["webpackHotUpdate_N_E"]("webpack",{},
 /******/ 
 /******/ /* webpack/runtime/getFullHash */
 /******/ !function() {
-/******/ 	__webpack_require__.h = function() { return "f992850263b158e6"; }
+/******/ 	__webpack_require__.h = function() { return "be77f539378b2604"; }
 /******/ }();
 /******/ 
 /******/ /* webpack/runtime/make namespace object */
@@ -154,7 +154,7 @@ self["webpackHotUpdate_N_E"]("webpack",{},
 /******/ 	};
 /******/ 	
 /******/ 	__webpack_require__.f.miniCss = function(chunkId, promises) {
-/******/ 		var cssChunks = {"_app-client_app_globals_css":1,"_app-client_node_modules_next_font_google_target_css_path_app_layout_jsx_import_Poppins_argum-c2225e":1};
+/******/ 		var cssChunks = {"_app-client_node_modules_next_font_google_target_css_path_app_layout_jsx_import_Poppins_argum-c2225e":1,"_app-client_app_globals_css":1};
 /******/ 		if(installedCssChunks[chunkId]) promises.push(installedCssChunks[chunkId]);
 /******/ 		else if(installedCssChunks[chunkId] !== 0 && cssChunks[chunkId]) {
 /******/ 			promises.push(installedCssChunks[chunkId] = loadStylesheet(chunkId).then(function() {
