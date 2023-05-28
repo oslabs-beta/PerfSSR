@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    reactStrictMode:true
+  experimental: {
+    instrumentationHook: true,
+  },
+  distDir: "build",
 };
 
-module.exports = async phase => {
-    console.log('Starting phase ', phase);
-    return nextConfig;
-};
+module.exports = nextConfig;

@@ -1,5 +1,5 @@
-import { startOtel } from "./fetch-telemetry.js";
-
-export function register() {
-  startOtel();
+export async function register() {
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    await import("./instrumentation.node");
+  }
 }
