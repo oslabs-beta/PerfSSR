@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import LoadingPage from './loading';
-import Courses from './componets/Courses';
-import CourseSearch from './componets/CourseSearch';
+import Courses from './components/Courses';
+import CourseSearch from './components/CourseSearch';
 
 const HomePage = () => {
   const [courses, setCourses] = useState([]);

@@ -17,7 +17,7 @@ const spanController = require("./spanController");
 
 //at root, middleware will parse spans, set parsed data on res.locals.clientData
 app.use("/", spanController.parseTrace, (req, res) => {
-  if (res.locals.clientData && client !== null) {
+  if (res.locals.clientData.length > 0 && client !== null) {
     client.send(JSON.stringify(res.locals.clientData));
     // // what to do after a connection is established
     res.sendStatus(200);
@@ -59,5 +59,5 @@ wss.on("connection", (ctx) => {
   });
 
   // sent a message that we're good to proceed
-  ctx.send("Hi from server");
+  // ctx.send("Hi from server");
 });

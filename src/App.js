@@ -9,11 +9,12 @@ import useWebSocket from "./hooks/webSocketHook";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Box } from "@mui/material";
 import MetricContainer from "./components/metricContainer";
-import HTTPReqChart from "./components/HTTPReqChart";
+// import HTTPReqChart from "./components/HTTPReqChart";
 import ServerComponent from "./components/serverComponent";
 import ClientComponent from "./components/clientComponent";
 import BenchmarkTime from "./components/benchmarkTime";
 import "./style.css";
+import NetworkPanel from './components/NetworkPanel';
 
 function App() {
   const theme = useMemo(() =>
@@ -54,6 +55,16 @@ function App() {
   const [messagesList, setMessagesList] = useState([]);
   const ws = useWebSocket({ socketUrl: "ws://localhost:4000" });
 
+  const networkData = [
+    { name: 'request1', method: 'GET', status: 200, type: 'document', startTime: 0, endTime: 500 },
+    { name: 'request2', method: 'GET', status: 304, type: 'stylesheet', startTime: 100, endTime: 400 },
+    { name: 'request3', method: 'POST', status: 200, type: 'xhr', startTime: 200, endTime: 600 },
+    { name: 'request4', method: 'GET', status: 200, type: 'image', startTime: 300, endTime: 700 },
+    // more requests...
+  ];
+
+
+
   useEffect(() => {
     const getMessageFromQueue = () => {
       chrome.runtime.sendMessage(
@@ -74,11 +85,15 @@ function App() {
   useEffect(() => {
     if (ws.data) {
       const { message } = ws.data;
-      setMessagesList((messagesList) => [].concat(message, messagesList));
-      console.log(message);
-      //console.log(JSON.parse(message));
+      console.log("message: ", message)
+      setMessagesList((prevMessagesList) => {
+        if (message.length > 0) return [].concat(message, prevMessagesList);
+      })
     }
   }, [ws.data]);
+
+  useEffect(() => {
+    console.log("messagesList: ", messagesList);}, [messagesList])
 
   useEffect(() => {
     console.log("fiberTree: ", fiberTree);
@@ -93,22 +108,22 @@ function App() {
         };
       });
 
-      setHttpReq((prevHttpReq) => {
-        if (message.message && message.message.data) {
-          if (
-            Object.keys(message.message.data).length !==
-            Object.keys(prevHttpReq.data).length
-          ) {
-            // console.log('received data: ', message.message.data)
-            const newHttpReq = { data: message.message.data };
-            setHttpToggle(true);
-            return newHttpReq;
-          }
-        } else {
-          setHttpToggle(false);
-        }
-        return prevHttpReq;
-      });
+      // setHttpReq((prevHttpReq) => {
+      //   if (message.message && message.message.data) {
+      //     if (
+      //       Object.keys(message.message.data).length !==
+      //       Object.keys(prevHttpReq.data).length
+      //     ) {
+      //       // console.log('received data: ', message.message.data)
+      //       const newHttpReq = { data: message.message.data };
+      //       setHttpToggle(true);
+      //       return newHttpReq;
+      //     }
+      //   } else {
+      //     setHttpToggle(false);
+      //   }
+      //   return prevHttpReq;
+      // });
 
       setFiberTree((prevFiberTree) => {
         if (
@@ -125,29 +140,29 @@ function App() {
 
   const handleRefreshClick = () => {
     try {
-      setHttpReq({ data: {} });
-      setHttpToggle(false);
+      // setHttpReq({ data: {} });
+      // setHttpToggle(false);
       chrome.devtools.inspectedWindow.reload(); // Refresh the inspected page
     } catch (error) {
       console.error("Error occurred while refreshing the page:", error);
     }
   };
 
-  useEffect(() => {
-    if (Object.keys(httpReq.data).length !== 0) setHttpToggle(true);
-    else setHttpToggle(false);
-  }, [httpReq]);
+  // useEffect(() => {
+  //   if (Object.keys(httpReq.data).length !== 0) setHttpToggle(true);
+  //   else setHttpToggle(false);
+  // }, [httpReq]);
 
-  let showHTTP = httpToggle ? (
-    <div>
-      <p className="chart-title">Performance of HTTP Requests</p>
-      <HTTPReqChart
-        key={httpToggle}
-        chartData={httpReq.data}
-        label={"Network Requests Time (ms)"}
-      />
-    </div>
-  ) : null;
+  // let showHTTP = httpToggle ? (
+  //   <div>
+  //     <p className="chart-title">Performance of HTTP Requests</p>
+  //     <HTTPReqChart
+  //       key={httpToggle}
+  //       chartData={httpReq.data}
+  //       label={"Network Requests Time (ms)"}
+  //     />
+  //   </div>
+  // ) : null;
 
   let atBegin =
     Object.keys(metrics).length === 0 ? (
@@ -168,7 +183,7 @@ function App() {
             <MetricContainer metrics={metrics} />
           </Box>
         </ThemeProvider>
-        {showHTTP}
+        {/* {showHTTP} */}
         <p className="chart-title">Server Side Components Rendering Times</p>
         <ServerComponent
           chartData={fiberTree}
@@ -186,11 +201,10 @@ function App() {
             "Rendering Time Compared with Average (+/- times faster/slower)"
           }
         />
-        {/* <ul>
-          {messagesList.map((message) => {
-            <li>{message}</li>;
-          })}
-        </ul> */}
+        <p className="chart-title">Server-side Fetching Summary</p>
+        <ThemeProvider theme={theme}>
+          <NetworkPanel chartData={messagesList} />
+        </ThemeProvider>
       </div>
     );
 
