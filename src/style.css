@@ -153,3 +153,9 @@ transform: scale(1.05);
   font-family: 'Poppins',sans-serif;
   margin-top: 40px;
 }
+
+.panel {
+  font-size: 15px;
+  color: whitesmoke;
+  font-family: 'Poppins',sans-serif;
+}

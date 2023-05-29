@@ -11,7 +11,8 @@ const ClientComponent = (props) => {
         "InnerLayoutRouter", "RedirectBoundary", "NotFoundBoundary",
         "LoadingBoundary", "ErrorBoundary", "HotReload", "Router",
         "ServerRoot", "RSCComponent", "Root", "ThrottledComponent",
-        "OuterLayoutRouter", "RenderFromTemplateContext", "HeaderDelayed"
+        "OuterLayoutRouter", "RenderFromTemplateContext", 
+        "HistoryUpdater", "AppRouterAnnouncer", "ScrollAndFocusHandler"
         ];
 
   const convertTreeToChart = (tree) => {
