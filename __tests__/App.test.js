@@ -50,3 +50,4 @@ test('renders the App component and intially with the button "Start PerfSSR"', (
     const buttonElement = screen.getByRole('button', { name: /Start PerfSSR/i });
     expect(buttonElement).toBeInTheDocument();
   });
+  

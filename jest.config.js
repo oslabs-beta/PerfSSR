@@ -9,3 +9,4 @@ module.exports = {
       '\\.(css|scss)$': '<rootDir>/testing-files/style.mock.js',
     },
   };
+  

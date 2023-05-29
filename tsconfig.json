@@ -12,3 +12,4 @@
     "include": ["src/**/*", "extension/*", "backend/*"],
     "exclude": ["node_modules", "**/*.spec.ts"]
   }
+  
