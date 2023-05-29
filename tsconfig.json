@@ -9,6 +9,6 @@
       "moduleResolution": "node",
       "esModuleInterop": true,
     },
-    "include": ["src/**/*", "extension/*"],
+    "include": ["src/**/*", "extension/*", "backend/*"],
     "exclude": ["node_modules", "**/*.spec.ts"]
   }
