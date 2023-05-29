@@ -37,7 +37,7 @@ console.log(rootNode);
 
 if (!devTool) {
   console.log(
-    "Unable to grab instance of fiber root. Are you sure React Dev Tools is installed?"
+    "Unable to grab instance of fiber root. Make sure React DevTools is installed."
   );
 }
 

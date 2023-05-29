@@ -28,6 +28,7 @@ const parseFetchSpan = (span, clientArr) => {
     spanType: "fetch",
     parentSpanId: spanObj.parentSpanId,
     spanId: spanObj.spanId,
+    hierarchy: spanObj.parentSpanId ? [span.parentSpanId, span.spanId] : [span.spanId],
     traceId: spanObj.traceId,
     startTime: spanObj.startTimeUnixNano / Math.pow(10, 6),
     endTime: spanObj.endTimeUnixNano / Math.pow(10, 6),
@@ -66,6 +67,7 @@ const parseHandleRequest = (span, clientArr) => {
     parentSpanId: spanObj.parentSpanId,
     spanId: spanObj.spanId,
     traceId: spanObj.traceId,
+    hierarchy: spanObj.parentSpanId ? [span.parentSpanId, span.spanId] : [span.spanId],
     statusCode: spanObj.attributes.find(
       (attr) => attr.key === "http.status_code"
     )?.value?.intValue,

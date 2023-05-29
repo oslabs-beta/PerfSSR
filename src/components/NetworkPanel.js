@@ -13,29 +13,18 @@ const NetworkPanel = (props) => {
     chartData.sort((a, b) => a.startTime - b.startTime)
     
       //get earliest time and latest end time in our chartData array
-  const minStartTime = Math.min(...chartData.map(item => item.startTime ? item.startTime: Number.POSITIVE_INFINITY));
-  const maxEndTime = Math.max(...chartData.map(item => item.endTime ? item.endTime: Number.NEGATIVE_INFINITY));
+    const minStartTime = Math.min(...chartData.map(item => item.startTime ? item.startTime: Number.POSITIVE_INFINITY));
+    const maxEndTime = Math.max(...chartData.map(item => item.endTime ? item.endTime: Number.NEGATIVE_INFINITY));
 
-    //get earliest time in our chartData array
-    // const minStartTime = Math.min(...chartData.map(item => item.startTime ? item.startTime: Number.POSITIVE_INFINITY));
     // find the min and max duration in the dataset
     const minDuration = Math.min(...chartData.map(item => item.endTime - item.startTime));
     const maxDuration = Math.max(...chartData.map(item => item.endTime - item.startTime));
 
     // function to normalize a time or duration
     const scale = (value, min, max) => (value - min) / (max - min);
-
-    //normalize start and end times since timestamp gaps can be very large
-    // const normalizedData = chartData.map(item => ({
-    //     ...item,
-    //     startTime: item.startTime - minStartTime,
-    //     endTime: item.endTime - minStartTime,
-    // }));
     
     // Generate waterfall bar data for each span object we have
     const barData = chartData.map((item, index) => {
-        // const scaledStartTime = Math.log(item.startTime + 1); 
-        // const scaledEndTime = Math.log(item.endTime + 1); 
         const scaledStartTime = scale(item.startTime, minStartTime, maxEndTime); 
         const scaledDuration = scale(item.endTime - item.startTime, minDuration, maxDuration); 
         return {
@@ -60,6 +49,41 @@ const NetworkPanel = (props) => {
         return null;
       };
 
+    const renderRow = (data, i, indent) => {
+        const children = barData.filter(child => data.spanId === child.parentSpanId);
+        let padding = indent * 20;
+        console.log("padding: ",padding)
+        console.log("children: ", children)
+
+        return (
+          <React.Fragment>
+            <TableRow>
+              <TableCell component="th" scope="row" style={{paddingLeft: `${padding}px`, wordWrap: "break-word"}}>{data.route ? data.route : data.url}</TableCell>
+              <TableCell>{data.httpMethod ? data.httpMethod : ""}</TableCell>
+              <TableCell>{data.statusCode}</TableCell>
+              <TableCell>{data.duration}</TableCell>
+              <TableCell>
+                <BarChart
+                layout="vertical"
+                width={600} 
+                height={30}
+                data={[data]}
+                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                >
+                  <XAxis type="number" domain={[0, maxScaledEndTime]} hide={true} />
+                  <YAxis type="category" dataKey="index" hide={true} />
+                  <Bar dataKey="pv" stackId="a" fill="transparent" />
+                  <Bar dataKey="uv" stackId="a" fill="#82ca9d">
+                    <Cell fill="#82ca9d" />
+                  </Bar>
+                </BarChart>
+              </TableCell>
+            </TableRow>
+            {children.map((child, j) => renderRow(child, j, indent+1))}
+          </React.Fragment>        
+        )
+    }
+
       return (
         <TableContainer component={Paper} >
           <Table sx={{ minWidth: 550 }} aria-label="Server-side Fetching Summary">
@@ -68,15 +92,18 @@ const NetworkPanel = (props) => {
                 <TableCell>Endpoint / URL</TableCell>
                 <TableCell>Method</TableCell>
                 <TableCell>Status</TableCell>
+                <TableCell>Duration (ms)</TableCell>
                 <TableCell>Waterfall</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {barData.map((data, i) => (
-                <TableRow key={i}>
+              {barData.filter(item => !item.parentSpanId).map((data, i) => renderRow(data, i, 1))}
+              {/* {barData.map((data, i) => (
+                <TableRow key={i}>  
                   <TableCell component="th" scope="row">{data.route ? data.route : data.url}</TableCell>
                   <TableCell>{data.httpMethod ? data.httpMethod : ""}</TableCell>
                   <TableCell>{data.statusCode}</TableCell>
+                  <TableCell>{data.duration}</TableCell>
                   <TableCell>
                     <BarChart
                       layout="vertical"
@@ -87,7 +114,6 @@ const NetworkPanel = (props) => {
                     >
                       <XAxis type="number" domain={[0, maxScaledEndTime]} hide={true} />
                       <YAxis type="category" dataKey="index" hide={true} />
-                      {/* <Tooltip content={<CustomTooltip duration={data.duration}/>} /> */}
                       <Bar dataKey="pv" stackId="a" fill="transparent" />
                       <Bar dataKey="uv" stackId="a" fill="#82ca9d">
                         <Cell fill="#82ca9d" />
@@ -95,65 +121,13 @@ const NetworkPanel = (props) => {
                     </BarChart>
                   </TableCell>
                 </TableRow>
-              ))}
+              ))} */}
             </TableBody>
           </Table>
         </TableContainer>
       );
   }
 
-  // const maxEndTime = Math.max(...props.chartData.map(item => {
-  //   if (item.spanId) return item.endTime;
-  // }));
-
-  // // Generate bar data
-  // const barData = props.chartData.map((item, index) => item.spanId ? {
-  //   ...item,
-  //   index: index,
-  //   pv: item.startTime,  // pv is the floating part (transparent)
-  //   uv: item.endTime - item.startTime  // uv is the part of the graph we want to show
-  // }
-  // : null).filter(item => item !== null);
-
-  // return (
-  //   <TableContainer component={Paper}>
-  //     <Table sx={{ minWidth: 650 }} aria-label="Server-side Fetching Summary">
-  //       <TableHead>
-  //         <TableRow>
-  //           <TableCell>Endpoint</TableCell>
-  //           <TableCell>Status</TableCell>
-  //           <TableCell>Waterfall</TableCell>
-  //         </TableRow>
-  //       </TableHead>
-  //       <TableBody>
-  //         {barData.map((data, i) => (
-  //           <TableRow key={i}>
-  //             <TableCell component="th" scope="row">{data.route}</TableCell>
-  //             <TableCell>{data.method ? data.method : ""}</TableCell>
-  //             <TableCell>{data.statusCode}</TableCell>
-  //             <TableCell>
-  //               <BarChart
-  //                 layout="vertical"
-  //                 width={500} 
-  //                 height={30}
-  //                 data={[data]}
-  //                 margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-  //               >
-  //                 <XAxis type="number" domain={[0, maxEndTime]} hide={true} />
-  //                 <YAxis type="category" dataKey="index" hide={true} />
-  //                 <Tooltip />
-  //                 <Bar dataKey="pv" stackId="a" fill="transparent" />
-  //                 <Bar dataKey="uv" stackId="a" fill="#82ca9d">
-  //                   <Cell fill="#82ca9d" />
-  //                 </Bar>
-  //               </BarChart>
-  //             </TableCell>
-  //           </TableRow>
-  //         ))}
-  //       </TableBody>
-  //     </Table>
-  //   </TableContainer>
-  // );
   return (
     <div>
     {waterfall}
@@ -162,3 +136,48 @@ const NetworkPanel = (props) => {
 };
 
 export default NetworkPanel;
+
+
+
+// return (
+//     <TableContainer component={Paper} >
+//       <Table sx={{ minWidth: 550 }} aria-label="Server-side Fetching Summary">
+//         <TableHead>
+//           <TableRow>
+//             <TableCell>Endpoint / URL</TableCell>
+//             <TableCell>Method</TableCell>
+//             <TableCell>Status</TableCell>
+//             <TableCell>Duration (ms)</TableCell>
+//             <TableCell>Waterfall</TableCell>
+//           </TableRow>
+//         </TableHead>
+//         <TableBody>
+//           {barData.map((data, i) => (
+//             <TableRow key={i}>
+//               <TableCell component="th" scope="row">{data.route ? data.route : data.url}</TableCell>
+//               <TableCell>{data.httpMethod ? data.httpMethod : ""}</TableCell>
+//               <TableCell>{data.statusCode}</TableCell>
+//               <TableCell>{data.duration}</TableCell>
+//               <TableCell>
+//                 <BarChart
+//                   layout="vertical"
+//                   width={600} 
+//                   height={30}
+//                   data={[data]}
+//                   margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+//                 >
+//                   <XAxis type="number" domain={[0, maxScaledEndTime]} hide={true} />
+//                   <YAxis type="category" dataKey="index" hide={true} />
+//                   {/* <Tooltip content={<CustomTooltip duration={data.duration}/>} /> */}
+//                   <Bar dataKey="pv" stackId="a" fill="transparent" />
+//                   <Bar dataKey="uv" stackId="a" fill="#82ca9d">
+//                     <Cell fill="#82ca9d" />
+//                   </Bar>
+//                 </BarChart>
+//               </TableCell>
+//             </TableRow>
+//           ))}
+//         </TableBody>
+//       </Table>
+//     </TableContainer>
+//   );
