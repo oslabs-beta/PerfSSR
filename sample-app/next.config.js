@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+  experimental: {
+    instrumentationHook: true,
+  },
+  distDir: "build",
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
