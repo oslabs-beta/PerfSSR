@@ -5,9 +5,9 @@ import React, {
   useState,
   useMemo,
 } from "react";
+import useWebSocket from "./hooks/webSocketHook";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Box } from "@mui/material";
-import { io } from "socket.io-client";
 import MetricContainer from "./components/metricContainer";
 import HTTPReqChart from "./components/HTTPReqChart";
 import ServerComponent from "./components/serverComponent";
@@ -51,10 +51,10 @@ function App() {
   const [httpReq, setHttpReq] = useState({ data: {} });
   const [httpToggle, setHttpToggle] = useState(false);
   const [fiberTree, setFiberTree] = useState();
+  const [messagesList, setMessagesList] = useState([]);
+  const ws = useWebSocket({ socketUrl: "ws://localhost:4000" });
 
   useEffect(() => {
-    initializeSocket();
-
     const getMessageFromQueue = () => {
       chrome.runtime.sendMessage(
         { type: "GET_MESSAGE_FROM_QUEUE" },
@@ -69,6 +69,16 @@ function App() {
     };
     getMessageFromQueue();
   }, []);
+
+  // receive messages from socket
+  useEffect(() => {
+    if (ws.data) {
+      const { message } = ws.data;
+      setMessagesList((messagesList) => [].concat(message, messagesList));
+      console.log(message);
+      //console.log(JSON.parse(message));
+    }
+  }, [ws.data]);
 
   useEffect(() => {
     console.log("fiberTree: ", fiberTree);
@@ -112,20 +122,6 @@ function App() {
       });
     });
   }, []);
-
-  const initializeSocket = async () => {
-    // const socket = await io("http://localhost:4000");
-    // socket.on("connect", () => {
-    //   console.log("socket connected", socket.id);
-    // });
-    // socket.on("message", (msg) => {
-    //   console.log("message received from socket", msg);
-    //   console.log(JSON.parse(nsg));
-    // });
-    // socket.on("connection-established", (args) => {
-    //   console.log("socket message", args);
-    // });
-  };
 
   const handleRefreshClick = () => {
     try {
@@ -190,6 +186,11 @@ function App() {
             "Rendering Time Compared with Average (+/- times faster/slower)"
           }
         />
+        {/* <ul>
+          {messagesList.map((message) => {
+            <li>{message}</li>;
+          })}
+        </ul> */}
       </div>
     );
 

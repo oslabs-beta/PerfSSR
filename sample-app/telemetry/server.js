@@ -1,62 +1,63 @@
-// --- EXPRESS SERVER / SOCKET SETUP --- //
-
 // module.exports = {
 //   startServer: function () {
 //express configuration
 const express = require("express");
+const ws = require("ws");
 const app = express();
-const { createServer } = require("http");
-//const httpServer = require("http").createServer(app);
-//const { Server } = require("socket.io");
-const httpServer = createServer(app);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const otelController = require("./otelController"); //import middleware
+let client = null;
+// ws instance
+const wss = new ws.Server({ noServer: true });
 
-// const io = new Server(httpServer, {
-//   cors: {
-//     origin: `*`,
-//     credentials: true,
-//   },
-// });
+//controller that handles parsing of span data
+const spanController = require("./spanController");
 
-// const io = require("socket.io")(httpServer, {
-//   cors: {
-//     origin: `*`,
-//     credentials: true,
-//   },
-// });
-
-//custom express server running on port 4000 to send data to front end dashboard
-app.use("/", otelController.parseTrace, (req, res) => {
-  if (res.locals.clientData.length > 0)
-    //   //io.emit("message", JSON.stringify(res.locals.clientData));
-
+//at root, middleware will parse spans, set parsed data on res.locals.clientData
+app.use("/", spanController.parseTrace, (req, res) => {
+  if (res.locals.clientData && client !== null) {
+    client.send(JSON.stringify(res.locals.clientData));
+    // // what to do after a connection is established
     res.sendStatus(200);
+  }
 });
 
-//start custom express server on port 4000
-httpServer.listen(4000, () => {
+//server listening on port 4000
+const server = app.listen(4000, () => {
   console.log(`Custom trace listening server on port 4000`);
 });
-//   .on("error", function (err) {
-//     process.once("SIGUSR2", function () {
-//       process.kill(process.pid, "SIGUSR2");
-//     });
-//     process.on("SIGINT", function () {
-//       // this is only called on ctrl+c, not restart
-//       process.kill(process.pid, "SIGINT");
-//     });
-//   });
 
-//create socket running on top of express server + enable cors
-// const io = require("socket.io")(httpServer, {
-//   cors: {
-//     origin: `*`,
-//     credentials: true,
-//   },
-// });
-//   },
-// };
+// accepts an http server (covered later)
+
+// handle upgrade of the request
+server.on("upgrade", function upgrade(request, socket, head) {
+  try {
+    // authentication and some other steps will come here
+    // we can choose whether to upgrade or not
+
+    wss.handleUpgrade(request, socket, head, function done(ws) {
+      wss.emit("connection", ws, request);
+    });
+  } catch (err) {
+    console.log("upgrade exception", err);
+    socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+    socket.destroy();
+    return;
+  }
+});
+
+wss.on("connection", (ctx) => {
+  client = ctx;
+  // print number of active connections
+  console.log("connected", wss.clients.size);
+
+  // handle close event
+  ctx.on("close", () => {
+    console.log("closed", wss.clients.size);
+  });
+
+  // sent a message that we're good to proceed
+  ctx.send("Hi from server");
+});
