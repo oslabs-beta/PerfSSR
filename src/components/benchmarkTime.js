@@ -22,7 +22,7 @@ const BenchmarkTime = (props) => {
         "LoadingBoundary", "ErrorBoundary", "HotReload", "Router",
         "ServerRoot", "RSCComponent", "Root", "ThrottledComponent",
         "AppRouter", "OuterLayoutRouter", "RenderFromTemplateContext", 
-        "HeaderDelayed"
+        "HistoryUpdater", "AppRouterAnnouncer", "ScrollAndFocusHandler"
         ];
 
   const convertTreeToChart = (tree) => {
