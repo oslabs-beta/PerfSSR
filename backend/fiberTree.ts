@@ -1,91 +1,20 @@
-let devTool;
-let rootNode;
-let rdtOnCommitFiberRoot;
-let updatedFiberTree;
-
-// Listen for clicks
-let url = location.href;
-window.addEventListener(
-  "click",
-  () => {
-    requestAnimationFrame(() => {
-      if (url !== location.href && updatedFiberTree) {
-        window.postMessage(
-          {
-            type: "UPDATED_FIBER",
-            payload: JSON.stringify(updatedFiberTree, getCircularReplacer()),
-          },
-          "*"
-        );
-        url = location.href;
-      }
-    });
-  },
-  true
-);
-
-console.log("this means the injected file is running");
-//__REACT_DEVTOOLS_GLOBAL_HOOK__ instantiation of React Dev Tools within our app
-// can be accessed by using window.__REACT_DEVTOOLS_GLOBAL_HOOK__
-devTool = window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
-console.log("RDT instance", devTool);
-
-rootNode = devTool.getFiberRoots(1).values().next().value;
-console.log(rootNode);
-
-if (!devTool) {
-  console.log(
-    "Unable to grab instance of fiber root. Are you sure React Dev Tools is installed?"
-  );
-}
-
-// Limits calls made on a function (new render event) in a period of time
-const throttle = (func, delayMS) => {
-  let shouldWait = false;
-
-  // return function that takes new render event's fiber node arg
-  return (arg) => {
-    if (shouldWait) {
-      console.log("throttle anonymous: shouldWait is true, returning....");
-      return;
-    }
-
-    // console.log('throttle anonymous: shouldWait is false, invoking func now with arg', arg);
-    func(arg);
-    shouldWait = true;
-
-    // console.log('throttle anonymous: invoking setTimeout with delay value', delayMS);
-    setTimeout(() => {
-      // console.log('setTimeout callback invoked, setting shouldWait to false');
-      shouldWait = false;
-    }, delayMS);
-  };
-};
-
-//Execute throttle on new updated fiber root
-const throttleUpdatedFiberTree = throttle(function (updatedFiberNode) {
-  updatedFiberTree = new Tree(updatedFiberNode.current);
-  updatedFiberTree.buildTree(updatedFiberNode.current);
-}, 500);
-
-//intercept the original onCommitFiberRoot
-const intercept = function (originalOnCommitFiberRootFn) {
-  // preserve origial onCommitFiberRoot
-  rdtOnCommitFiberRoot = originalOnCommitFiberRootFn;
-
-  return function (...args) {
-    const rdtFiberRootNode = args[1]; // root a rgument (args: rendererID, root, priorityLevel)
-    if (rdtFiberRootNode) {
-      throttleUpdatedFiberTree(rdtFiberRootNode);
-    }
-    return originalOnCommitFiberRootFn(...args);
-  };
-};
-
-// ---------------------TREE
-
 class TreeNode {
-  constructor(fiberNode) {
+  children: any[];
+  sibling: any[];
+  actualStartTime: number;
+  selfBaseDuration: number;
+  renderDurationMS: number;
+  componentName: string;
+  tagObj: {
+            tag: number;
+            tagName: string
+          };
+  componentState: any;
+  componentProps: any;
+  key: any;
+  _debugHookTypes: null | string | string[];
+
+  constructor(fiberNode: any) {
     const {
       memoizedState,
       memoizedProps,
@@ -135,26 +64,26 @@ class TreeNode {
     this.selfBaseDuration = selfBaseDuration;
   }
 
-  addChild(newNode) {
+  addChild(newNode: any) {
     if (newNode) {
       this.children.push(newNode);
     }
   }
 
-  addSibling(newNode) {
+  addSibling(newNode: any) {
     if (newNode) this.sibling.push(newNode);
   }
 
-  setComponentName(elementType) {
+  setComponentName(elementType: any) {
     try {
-      if (elementType && Object.hasOwn(elementType, "name")) {
+      if (elementType && elementType.hasOwnProperty("name")) {
         // Root node will always have the hardcoded component name 'root'
         this.componentName =
           this.tagObj.tagName === "Host Root" ? "Root" : elementType.name;
-      } else if (elementType && Object.hasOwn(elementType, "_payload")) {
+      } else if (elementType && elementType.hasOwnProperty("_payload")) {
         if (
-          Object.hasOwn(elementType._payload, "value") &&
-          Object.hasOwn(elementType._payload.value, "name")
+          elementType._payload.hasOwnProperty("value") &&
+          elementType._payload.value.hasOwnProperty("name")
         ) {
           this.componentName = this.tagObj.tagName =
             elementType._payload.value.name;
@@ -167,7 +96,7 @@ class TreeNode {
     }
   }
 
-  setTagObj(fiberTagNum) {
+  setTagObj(fiberTagNum: number) {
     try {
       if (fiberTagNum !== undefined && fiberTagNum !== null) {
         this.tagObj = {
@@ -182,44 +111,45 @@ class TreeNode {
     }
   }
 
-  setRenderDurationMS(actualDuration) {
+  setRenderDurationMS(actualDuration: number) {
     this.renderDurationMS = actualDuration;
   }
 
-  setState(memoizedState) {
+  setState(memoizedState: any) {
     this.componentState = memoizedState;
   }
 
-  setProps(memoizedProps) {
+  setProps(memoizedProps: any) {
     this.componentProps = memoizedProps;
   }
 
-  setKey(key) {
+  setKey(key: any) {
     // The key is (or should be) provided by the developer to help differentiate components
     // of the same type
     // ReaPer uses this to help differentiate components for the graphs in the dashboard
     this.key = key;
   }
 
-  setHookTypes(_debugHookTypes) {
+  setHookTypes(_debugHookTypes: null | string | string[]) {
     this._debugHookTypes = _debugHookTypes;
   }
 }
 
 class Tree {
-  constructor(rootFiberNode) {
+  root: any;
+  constructor(rootFiberNode: any) {
     this.root = null;
     this.buildTree(rootFiberNode);
   }
 
-  buildTree(rootFiberNode) {
-    function traverse(fiberNode, parentTreeNode) {
+  buildTree(rootFiberNode: any) {
+    function traverse(fiberNode: any, parentTreeNode: any) {
       const { tag } = fiberNode;
       const tagName = getFiberNodeTagName(tag);
       //console.log("current fiberNode ", fiberNode);
       //console.log("current elementType", elementType);
       //'Function Component' || tagName === 'Class Component' ||
-      let newNode;
+      let newNode: any;
       if (
         tagName === "Host Root" ||
         tagName === "Host Component" ||
@@ -253,8 +183,8 @@ class Tree {
   }
 }
 
-const getFiberNodeTagName = (tagNum) => {
-  let tagName = "";
+const getFiberNodeTagName = (tagNum: number) => {
+  let tagName: string = "";
 
   switch (tagNum) {
     case 0:
@@ -348,40 +278,4 @@ const getFiberNodeTagName = (tagNum) => {
   return tagName;
 };
 
-const getCircularReplacer = () => {
-  const seen = new Map();
-  return function (key, value) {
-    if (typeof value !== "object" || value === null) {
-      return value;
-    }
-    if (seen.has(value)) {
-      return "[Circular]";
-    }
-    seen.set(value, true);
-    return value;
-  };
-};
-
-// listener for everytime onCommitFiber is executed, will intercept it with monkey patching to run additional side effects
-
-devTool.onCommitFiberRoot = intercept(devTool.onCommitFiberRoot);
-
-//Build the tree from root fiber node
-const newTree = new Tree(rootNode.current);
-
-console.log("built tree", newTree);
-
-//Check if the we have an instance of the tree
-//send it to the content script which will send it to background.js
-if (newTree) {
-  newTree.buildTree(rootNode.current);
-
-  window.postMessage(
-    {
-      type: "FIBER_INSTANCE",
-      payload: JSON.stringify(newTree, getCircularReplacer()),
-    },
-    "*"
-  );
-}
-// console.log(fiberRoot);
+export { Tree };

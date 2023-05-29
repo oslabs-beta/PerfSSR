@@ -20,7 +20,9 @@ const BenchmarkTime = (props) => {
   const notThese = [
         "InnerLayoutRouter", "RedirectBoundary", "NotFoundBoundary",
         "LoadingBoundary", "ErrorBoundary", "HotReload", "Router",
-        "ServerRoot", "RSCComponent", "Root", "ThrottledComponent"
+        "ServerRoot", "RSCComponent", "Root", "ThrottledComponent",
+        "AppRouter", "OuterLayoutRouter", "RenderFromTemplateContext", 
+        "HeaderDelayed"
         ];
 
   const convertTreeToChart = (tree) => {

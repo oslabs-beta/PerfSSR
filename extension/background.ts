@@ -1,39 +1,25 @@
-const connections = {};
-let currPort;
-const tabStatus = {};
+import { FiberMsg } from './contentScript';
+
+interface Connection {
+    postMessage: (msg: any) => void;
+}
+  
+interface NetworkObj {
+    networkReq: chrome.webRequest.WebRequestHeadersDetails | null;
+    networkRes: chrome.webRequest.WebResponseCacheDetails | null;
+}
+
+const connections : {[tabId: number]: Connection} = {};
+let currPort: chrome.runtime.Port | undefined;;
+const tabStatus: {[tabId: number]: string}= {};
 const responseSender = {};
-const networkMap = {};
-const messageQueue = [];
+const networkMap: {[requestId: string]: NetworkObj} = {};
+const messageQueue: FiberMsg[] = [];
 
-/*
-Info neded from network request/response
-
-
-Request Started:
----------------
-- Document ID?
-- requestID - logs the ID for that particular component network request
-- tabID - the ID that the app is living on (may not need this?)
-- timeStamp - Start time for when the network request is fired
-- Url - refines our search for only component based files / urls
-
-Request Completed:
----------------
-- Document ID
-- requestID
-- timeStamp (to get the request end time)
-- responseHeaders -> get the vary key to check if it contains 'RSC'
-- url (url being requested)
-
-*/
-
-//Event listener connected to console log anytime a network request starts
+// Event listener connected to console log anytime a network request starts
 chrome.webRequest.onBeforeRequest.addListener(
-  function (details) {
-    // Request started, capture start time
-    //console.log("Request started: ", details);
-
-    //before request, set tabStatus to loading to track content status
+  function (details: chrome.webRequest.WebRequestBodyDetails) {
+    // Before request, set tabStatus to loading to track content status
     tabStatus[details.tabId] = "loading";
   },
   { urls: ["http://localhost:3000/*"] },
@@ -41,13 +27,13 @@ chrome.webRequest.onBeforeRequest.addListener(
 );
 
 chrome.webRequest.onSendHeaders.addListener(
-  function (details) {
+  function (details: chrome.webRequest.WebRequestHeadersDetails) {
     // console.log("On before send headers", details);
     const { requestId } = details;
 
     details.requestHeaders.forEach((req) => {
       if (req.name.toLowerCase().includes("rsc")) {
-        const networkObj = {
+        const networkObj:  NetworkObj = {
           networkReq: null,
           networkRes: null,
         };
@@ -63,7 +49,7 @@ chrome.webRequest.onSendHeaders.addListener(
 
 //Event listener connected to console log anytime a network request finishes
 chrome.webRequest.onCompleted.addListener(
-  function (details) {
+  function (details: chrome.webRequest.WebResponseCacheDetails) {
     //console.log("Request finished: ", details);
     const { requestId } = details;
 
@@ -85,7 +71,7 @@ chrome.webRequest.onCompleted.addListener(
   ["responseHeaders"]
 );
 
-const sendMessageToDevTool = (msg) => {
+const sendMessageToDevTool = (msg: {}) => {
   // console.log("port inside", currPort);
   if (currPort === undefined) {
     console.log("background.js: no port to send message to!");
@@ -101,11 +87,11 @@ chrome.runtime.onConnect.addListener((port) => {
   currPort = port;
   console.log("connected port", currPort);
   //Listen to messages from dev tool
-  const devToolsListener = (message, port) => {
+  const devToolsListener = (message: any, port: chrome.runtime.Port) => {
     // inject script
     chrome.scripting.executeScript({
       target: { tabId: message.tabId },
-      function: injectScript,
+      func: injectScript,
       args: [chrome.runtime.getURL("/bundles/backend.bundle.js")],
       injectImmediately: true,
     });
@@ -165,55 +151,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       value: message.value,
     });
   }
-
-  // console.log('message', message);
-  // //send networkMap when requested elsewhere
-  // if (message.getInfo) {
-  //   if (tabStatus[sender.tab.id] === 'complete') {
-  //     sendResponse({data: 'sending complete data from bg to devtools'});
-  //   }
-  // } else {
-  //   //send later, set the function to send back response to tab id as key
-  //   responseSender[sender.tab.id] = sendResponse;
-  //   console.log("responseSender", sender.tab.id);
-  //   return true; //to indicate we are sending later
-  // }
-
-  if (sender.tab) {
-    // if (message.click === true) {
-    //     console.log('I am here!');
-    //     const response = {
-    //         xPosition: message.xPosition,
-    //         yPosition: message.yPosition
-    //     };
-    //     // Check if the tab has a connection established
-    //     if (connections[sender.tab.id]) {
-    //       // Send the response to the DevTools script
-    //       connections[sender.tab.id].postMessage(response);
-    //   }
-    // }
-    // Send message to corresponding dev tool instance
-    // let tabId = `${sender.tab.id}`;
-    // if (tabId in connections) connections[tabId].postMessage(message);
-    // else {
-    //   // Tells content script that connection was not made
-    //   sendResponse({
-    //     error: 'error',
-    //   });
-    //   console.log(`Tab, ${tabId}, not found in connection list: `, connections);
-    // }
-  }
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
-    //reinject script on reload
-    // chrome.scripting.executeScript({
-    //   target: { tabId },
-    //   function: injectScript,
-    //   args: [chrome.runtime.getURL("/bundles/backend.bundle.js")],
-    //   injectImmediately: true,
-    // });
 
     for (let variableKey in networkMap) {
       if (networkMap.hasOwnProperty(variableKey)) {
@@ -224,11 +165,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     // Do something when the tab has been reloaded
 
     // Send a message to the contentScript that new performance data is needed
-    chrome.tabs.sendMessage(tabId, { message: "TabUpdated" });
+    chrome.tabs.sendMessage(tabId, {message: "TabUpdated"});
   }
 });
 
-const injectScript = (file) => {
+const injectScript = (file: string): void => {
   try {
     const htmlBody = document.getElementsByTagName("body")[0];
     const script = document.createElement("script");

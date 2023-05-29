@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "outDir": "./dist/",
+      "noImplicitAny": true,
+      "module": "Commonjs",
+      "target": "es6",
+      "jsx": "react",
+      "allowJs": true,
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+    },
+    "include": ["src/**/*", "extension/*", "backend/*"],
+    "exclude": ["node_modules", "**/*.spec.ts"]
+  }
