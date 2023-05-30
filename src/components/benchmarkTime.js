@@ -61,8 +61,6 @@ const BenchmarkTime = (props) => {
     if (props.chartData)
       convertTreeToChart(...props.chartData.root.children);
 
-    console.log('inputData: ', inputData)
-
     if (!chartRef.current) {
       return;
     }

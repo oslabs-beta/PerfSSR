@@ -3,7 +3,6 @@ import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip } from 'recha
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 const NetworkPanel = (props) => {
-  console.log("chartData: ", props.chartData)
   const waterfall = props.chartData ? processData(props.chartData) : null;
   
   //function to process start/end times for waterfall data
@@ -52,8 +51,6 @@ const NetworkPanel = (props) => {
     const renderRow = (data, i, indent) => {
         const children = barData.filter(child => data.spanId === child.parentSpanId);
         let padding = indent * 20;
-        console.log("padding: ",padding)
-        console.log("children: ", children)
 
         return (
           <React.Fragment>

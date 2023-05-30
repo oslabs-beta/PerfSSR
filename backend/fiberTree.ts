@@ -1,6 +1,6 @@
 class TreeNode {
   children: any[];
-  sibling: any[];
+  siblings: any[];
   actualStartTime: number;
   selfBaseDuration: number;
   renderDurationMS: number;
@@ -28,6 +28,7 @@ class TreeNode {
     } = fiberNode;
 
     this.children = [];
+    this.siblings = [];
 
     /*
       - tagObj identifies the type of fiber
@@ -71,7 +72,7 @@ class TreeNode {
   }
 
   addSibling(newNode: any) {
-    if (newNode) this.sibling.push(newNode);
+    if (newNode) this.siblings.push(newNode);
   }
 
   setComponentName(elementType: any) {
