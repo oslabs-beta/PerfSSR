@@ -45,7 +45,7 @@ const ClientComponent = (props) => {
     if (props.chartData)
       convertTreeToChart(...props.chartData.root.children);
 
-    console.log('inputData: ', inputData)
+      console.log("client side input data: ", inputData)
 
     if (!chartRef.current) {
       return;

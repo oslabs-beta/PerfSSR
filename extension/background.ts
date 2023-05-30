@@ -155,6 +155,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
+    // inject script
 
     for (let variableKey in networkMap) {
       if (networkMap.hasOwnProperty(variableKey)) {
@@ -163,6 +164,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }
     sendMessageToDevTool({ data: networkMap });
     // Do something when the tab has been reloaded
+
+    chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      func: injectScript,
+      args: [chrome.runtime.getURL("/bundles/backend.bundle.js")],
+      injectImmediately: true,
+    });
 
     // Send a message to the contentScript that new performance data is needed
     chrome.tabs.sendMessage(tabId, {message: "TabUpdated"});

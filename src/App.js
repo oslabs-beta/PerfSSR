@@ -85,7 +85,6 @@ function App() {
   useEffect(() => {
     if (ws.data) {
       const { message } = ws.data;
-      console.log("message: ", message)
       setMessagesList((prevMessagesList) => {
         if (message.length > 0) return [].concat(message, prevMessagesList);
       })
