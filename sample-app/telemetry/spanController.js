@@ -28,13 +28,11 @@ const parseFetchSpan = (span, clientArr) => {
     spanType: "fetch",
     parentSpanId: spanObj.parentSpanId,
     spanId: spanObj.spanId,
-    hierarchy: spanObj.parentSpanId ? [span.parentSpanId, span.spanId] : [span.spanId],
     traceId: spanObj.traceId,
     startTime: spanObj.startTimeUnixNano / Math.pow(10, 6),
     endTime: spanObj.endTimeUnixNano / Math.pow(10, 6),
-    duration: Math.floor(
-      (spanObj.endTimeUnixNano - spanObj.startTimeUnixNano) / Math.pow(10, 6)
-    ),
+    duration:(spanObj.endTimeUnixNano - spanObj.startTimeUnixNano) / Math.pow(10, 6)
+    ,
     url: spanObj.attributes.find((attr) => attr.key === "http.url")?.value
       ?.stringValue,
     httpMethod: spanObj.attributes.find((attr) => attr.key === "http.method")
@@ -73,9 +71,7 @@ const parseHandleRequest = (span, clientArr) => {
     )?.value?.intValue,
     startTime: spanObj.startTimeUnixNano / Math.pow(10, 6),
     endTime: spanObj.endTimeUnixNano / Math.pow(10, 6),
-    duration: Math.floor(
-      (spanObj.endTimeUnixNano - spanObj.startTimeUnixNano) / Math.pow(10, 6)
-    ),
+    duration: (spanObj.endTimeUnixNano - spanObj.startTimeUnixNano) / Math.pow(10, 6),
     route: spanObj.attributes.find(
       (attr) => attr.key === "http.target" || attr.key === "next.route"
     )?.value?.stringValue,

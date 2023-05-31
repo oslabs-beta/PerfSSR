@@ -15,6 +15,7 @@ const BenchmarkTime = (props) => {
 
   const chartRef = useRef(null);
   const [chart, setChart] = useState(null);
+  const [toggle, setToggle] = useState(false);
   
   const inputData = [];
   const notThese = [
@@ -26,27 +27,21 @@ const BenchmarkTime = (props) => {
         ];
 
   const convertTreeToChart = (tree) => {
-    
-    const processBenchmarking = (t) => {
-        const avg = 22;
-        let result;
-        result = t < avg ? (avg/t) : -(t/avg)
-        return result.toFixed(2);
-    }
 
+    //function to perform breadth first search on fiber tree to get nodes
     const bfs = (...tree) => {
         const q = [...tree];
 
         while (q.length > 0) {
             const node = q.shift();
             // Only keep nodes that are funtion components and with a component name
-            if (node.tagObj.tag === 0 && node.componentName !== "" && !notThese.includes(node.componentName)) {
+            if ((node.tagObj.tag === 0 || node.tagObj.tag === 11) && node.componentName !== "" && !notThese.includes(node.componentName)) {
                 if (node.renderDurationMS === 0) 
                    inputData.push({componentName: node.componentName, 
-                     time: Number(processBenchmarking(node.selfBaseDuration * 100))
+                     time: Number(node.selfBaseDuration * 100)
                    })
                 else inputData.push({componentName: node.componentName, 
-                                time: Number(processBenchmarking(node.renderDurationMS * 100))
+                                time: Number(node.renderDurationMS * 100)
                                })
             }
             if (node.children.length > 0) q.push(...node.children);
@@ -54,6 +49,19 @@ const BenchmarkTime = (props) => {
     }
     
     bfs(tree);
+    let avg = inputData.reduce((acc, curr) => acc + curr.time, 0) / inputData.length;
+    console.log("avg: ", avg);
+
+    const processBenchmarking = (t) => {
+      let result;
+      result = t < avg ? (avg/t) : -(t/avg)
+      return result.toFixed(2);
+    }
+
+    inputData.forEach(e => {
+      e.time = Number(processBenchmarking(e.time))
+    });
+
   } 
 
   useEffect(() => {
@@ -61,9 +69,18 @@ const BenchmarkTime = (props) => {
     if (props.chartData)
       convertTreeToChart(...props.chartData.root.children);
 
+    if (inputData.length === 0) setToggle(false); 
+    else setToggle(true);
+
     if (!chartRef.current) {
       return;
     }
+
+    // If there's an existing chart, destroy it before creating a new one
+    if (chart) {
+      chart.destroy();
+    }
+
     const ctx = chartRef.current.getContext("2d");
 
     //configuration of data into readable chart data for component
@@ -99,12 +116,23 @@ const BenchmarkTime = (props) => {
     },
 });
     setChart(newChart);
-  }, []);
 
+    // Clean up the previous chart instance when the component unmounts
+    return () => {
+      if (chart) {
+        chart.destroy();
+      }
+    };
+
+  }, [props.chartData]);
+
+  const display = toggle 
+  ? (<canvas ref={chartRef} />) 
+  : (<p className="toggle-text">No valid components available</p>)
 
   return (
-    <div>
-      <canvas ref={chartRef} />
+    <div className='chart-dimension'>
+      {display}
     </div>
   );
 };

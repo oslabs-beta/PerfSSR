@@ -5,26 +5,6 @@ let rootNode;
 let rdtOnCommitFiberRoot;
 let updatedFiberTree: any;
 
-// Listen for clicks
-let url = location.href;
-window.addEventListener(
-  "click",
-  () => {
-    requestAnimationFrame(() => {
-      if (url !== location.href && updatedFiberTree) {
-        window.postMessage(
-          {
-            type: "UPDATED_FIBER",
-            payload: JSON.stringify(updatedFiberTree, getCircularReplacer()),
-          },
-          "*"
-        );
-        url = location.href;
-      }
-    });
-  },
-  true
-);
 
 console.log("this means the injected file is running");
 //__REACT_DEVTOOLS_GLOBAL_HOOK__ instantiation of React Dev Tools within our app
@@ -42,7 +22,10 @@ if (!devTool) {
 }
 
 // Limits calls made on a function (new render event) in a period of time
-const throttle = (func: (arg: any) => void, delayMS: number):((arg: any) => void) => {
+const throttle = (
+  func: (arg: any) => void,
+  delayMS: number
+): ((arg: any) => void) => {
   let shouldWait = false;
 
   // return function that takes new render event's fiber node arg
@@ -52,12 +35,16 @@ const throttle = (func: (arg: any) => void, delayMS: number):((arg: any) => void
       return;
     }
 
-    func(arg);
     shouldWait = true;
 
-    setTimeout(() => {
-      shouldWait = false;
-    }, delayMS);
+    setTimeout(
+      () => {
+        func(arg);
+        shouldWait = false;
+      },
+      delayMS,
+      func
+    );
   };
 };
 
@@ -66,18 +53,27 @@ const throttle = (func: (arg: any) => void, delayMS: number):((arg: any) => void
 const throttleUpdatedFiberTree = throttle(function (updatedFiberNode) {
   updatedFiberTree = new Tree(updatedFiberNode.current);
   updatedFiberTree.buildTree(updatedFiberNode.current);
-  }, 500);
+  }, 70);
   
   //intercept the original onCommitFiberRoot
-  const intercept = function (originalOnCommitFiberRootFn: any) {
+  const intercept = function (originalOnCommitFiberRootFn: any, updatedFiberTree: any ) {
     // preserve origial onCommitFiberRoot
     rdtOnCommitFiberRoot = originalOnCommitFiberRootFn;
   
     return function (...args: any[]) {
       const rdtFiberRootNode = args[1]; // root a rgument (args: rendererID, root, priorityLevel)
-      if (rdtFiberRootNode) {
-        throttleUpdatedFiberTree(rdtFiberRootNode);
+      updatedFiberTree = new Tree(rdtFiberRootNode);
+      updatedFiberTree.buildTree(rdtFiberRootNode.current);
+      if(updatedFiberTree) {
+        window.postMessage(
+          {
+            type: "UPDATED_FIBER",
+            payload: JSON.stringify(updatedFiberTree, getCircularReplacer()),
+          },
+          "*"
+        );
       }
+
       return originalOnCommitFiberRootFn(...args);
     };
   };
@@ -97,11 +93,11 @@ const throttleUpdatedFiberTree = throttle(function (updatedFiberNode) {
   };
   
   // listener for everytime onCommitFiber is executed, will intercept it with monkey patching to run additional side effects
-  
-  devTool.onCommitFiberRoot = intercept(devTool.onCommitFiberRoot);
-  
+  devTool.onCommitFiberRoot = intercept(devTool.onCommitFiberRoot, updatedFiberTree);
+
   //Build the tree from root fiber node
-  const newTree = new Tree(rootNode.current);
+  const newTree =
+    rootNode && rootNode.current ? new Tree(rootNode.current) : undefined;
   
   console.log("built tree", newTree);
   
