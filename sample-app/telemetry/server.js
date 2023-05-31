@@ -29,8 +29,6 @@ const server = app.listen(4000, () => {
   console.log(`Custom trace listening server on port 4000`);
 });
 
-// accepts an http server (covered later)
-
 // handle upgrade of the request
 server.on("upgrade", function upgrade(request, socket, head) {
   try {

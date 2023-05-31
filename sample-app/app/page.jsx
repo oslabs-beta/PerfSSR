@@ -7,22 +7,22 @@ import CourseSearch from './components/CourseSearch';
 
 const HomePage = () => {
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCourses = async () => {
       const res = await fetch('/api/courses');
       const data = await res.json();
       setCourses(data);
-      setLoading(false);
+      // setLoading(false);
     };
 
     fetchCourses();
   }, []);
 
-  if (loading) {
-    return <LoadingPage />;
-  }
+  // if (loading) {
+  //   return <LoadingPage />;
+  // }
 
   return (
     <>
