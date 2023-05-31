@@ -122,7 +122,7 @@ function App() {
 
   let atBegin =
     Object.keys(metrics).length === 0 ? (
-      <div>
+      <div className="container">
         <img src="../assets/perfssr_logo.png"/>
         <p className="title">PerfSSR - Your Next.js Analysitcs Tool</p>
         <button className="refresh-button" onClick={handleRefreshClick}>
@@ -130,7 +130,7 @@ function App() {
         </button>
       </div>
     ) : (
-      <div>
+      <div className="container">
         <button className="reg-button" onClick={handleRefreshClick}>
           Regenerate Analytics for Current Page
         </button>
