@@ -9,7 +9,11 @@
   "devtools_page": "devtools.html",
   "update_url": "https://path/to/updateInfo.xml",
   "version_name": "1.0 beta",
-
+  "icons": {
+    "16": "./assets/perfssr_favicon.png",
+    "48": "./assets/perfssr_icon_48.png", 
+    "128": "./assets/perfssr_icon_128.png"
+},
   "background": {
     "service_worker": "bundles/background.bundle.js"
   },
