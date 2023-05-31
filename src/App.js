@@ -54,6 +54,8 @@ function App() {
 
   useEffect(() => {
     const getMessageFromQueue = () => {
+      // Initial fiber tree will be sent before App.js renders
+      // so send a message to background.ts once App.js is done rendering to retrieve the fiber tree message
       chrome.runtime.sendMessage(
         { type: "GET_MESSAGE_FROM_QUEUE" },
         (message) => {
@@ -67,7 +69,7 @@ function App() {
     getMessageFromQueue();
   }, []);
 
-  // receive messages from socket
+  // receive messages from socket and set the messageList accoridngly
   useEffect(() => {
     if (ws.data) {
       const { message } = ws.data;
@@ -80,7 +82,7 @@ function App() {
   useEffect(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // listener to the message sent from background.ts 
-      // if the message is on metrics, set the metrics 
+      // if the message is on metrics, set the metrics accordingly
       setMetrics((prevMetrics) => {
         return {
           ...prevMetrics,
@@ -88,6 +90,7 @@ function App() {
         };
       });
 
+      // if the message is on fiber tree, set the fiberTree accordingly
       setFiberTree((prevFiberTree) => {
         if (
           message.type === "UPDATED_FIBER" ||
