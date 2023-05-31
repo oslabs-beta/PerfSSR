@@ -30,23 +30,15 @@ class TreeNode {
     this.children = [];
     this.siblings = [];
 
-    /*
-      - tagObj identifies the type of fiber
-      - Has two keys:
-        1. tag - the tag number from React
-        2. tagName - the name corresponding with the tag number
-    */
     this.setTagObj(tag);
-    this.setComponentName(elementType);
+    this.setComponentName(elementType, tag, memoizedProps);
     this.setProps(memoizedProps);
     this.setState(memoizedState);
     this.setKey(key);
     this.setHookTypes(_debugHookTypes);
 
-    /*
-      - The actual duration is the time spent rendering this Fiber and its descendants for the current update.
-      - It includes time spent working on children.
-    */
+
+    //render time here includes render time for this fiber node and the time took to render all its children
     this.setRenderDurationMS(actualDuration);
 
     // Not sure if we need these, but saving them anyway
@@ -75,21 +67,29 @@ class TreeNode {
     if (newNode) this.siblings.push(newNode);
   }
 
-  setComponentName(elementType: any) {
+  setComponentName(elementType: any, tag: any, memoizedProps: any) {
     try {
       if (elementType && elementType.hasOwnProperty("name")) {
         // Root node will always have the hardcoded component name 'root'
         this.componentName =
           this.tagObj.tagName === "Host Root" ? "Root" : elementType.name;
+      } else if (tag === 11 && (memoizedProps.href || memoizedProps.src)) { 
+        //setting component name for next's Link components to the href path
+        this.componentName = memoizedProps.href ? "link href: " + memoizedProps.href
+        : "link src: " + memoizedProps.src
       } else if (elementType && elementType.hasOwnProperty("_payload")) {
+        //if component type is react.lazy, then look into its payload to set its name
         if (
           elementType._payload.hasOwnProperty("value") &&
           elementType._payload.value.hasOwnProperty("name")
         ) {
           this.componentName = this.tagObj.tagName =
             elementType._payload.value.name;
+        } else {
+          this.componentName = "";
         }
-      } else {
+      } 
+      else {
         this.componentName = "";
       }
     } catch (error) {
@@ -125,9 +125,7 @@ class TreeNode {
   }
 
   setKey(key: any) {
-    // The key is (or should be) provided by the developer to help differentiate components
-    // of the same type
-    // ReaPer uses this to help differentiate components for the graphs in the dashboard
+    //if there is a key defined for the component, grab it 
     this.key = key;
   }
 
@@ -154,11 +152,12 @@ class Tree {
       if (
         tagName === "Host Root" ||
         tagName === "Host Component" ||
-        tagName === "Function Component"
+        tagName === "Function Component" ||
+        tagName === "Forward Ref"
       ) {
         // Create a TreeNode using the FiberNode
         newNode = new TreeNode(fiberNode);
-
+        //console.log(newNode)
         // If parentTreeNode is null, set the root of the tree
         if (!parentTreeNode) {
           this.root = newNode;
@@ -184,6 +183,8 @@ class Tree {
   }
 }
 
+//function to assign tagNames based on React's work tag assignments
+//see: https://github.com/facebook/react/blob/a1f97589fd298cd71f97339a230f016139c7382f/packages/react-reconciler/src/ReactWorkTags.js
 const getFiberNodeTagName = (tagNum: number) => {
   let tagName: string = "";
 
