@@ -1,4 +1,6 @@
-[logo]: https://github.com/oslabs-beta/perfssr/extension/assets/perfssr_logo.png
+<p align="center">
+    <img src="./extension/assets/perfssr_logo.png" alt="PerfSSR">
+</p>
 
 # PerfSSR
 
