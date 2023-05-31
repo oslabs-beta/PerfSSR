@@ -1,4 +1,5 @@
 import React from "react";
+import { styled } from '@mui/material/styles';
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
@@ -41,17 +42,16 @@ const NetworkPanel = (props) => {
     // if no parent span present in the span array, just display all the span directly
     let toggle = true;    
     if (parent.length !== 0) toggle = false;
-    // generate custom tooltip
-    // const CustomTooltip = ({ duration }) => {
-    //     if (duration) {
-    //       return (
-    //         <div style={{backgroundColor: "whitesmoke", margin: "2, 2, 2, 2", color: "black"}}>
-    //           <p className="label" >{`Duration: ${duration}`}</p>
-    //         </div>
-    //       );
-    //     }      
-    //     return null;
-    //   };
+
+    const StyledTableRow = styled(TableRow)(({ theme }) => ({
+      '&:nth-of-type(odd)': {
+        backgroundColor: '#353554',
+      },
+      // hide last border
+      '&:last-child td, &:last-child th': {
+        border: 0,
+      },
+    }));
 
     const renderRow = (data, i, indent) => {
         const children = barData.filter(child => data.spanId === child.parentSpanId);
@@ -59,7 +59,7 @@ const NetworkPanel = (props) => {
 
         return (
           <React.Fragment>
-            <TableRow>
+            <StyledTableRow>
               <TableCell component="th" scope="row" style={{paddingLeft: `${padding}px`, wordWrap: "break-word"}}>{data.route ? data.route : data.url}</TableCell>
               <TableCell>{data.httpMethod ? data.httpMethod : ""}</TableCell>
               <TableCell>{data.statusCode}</TableCell>
@@ -80,7 +80,7 @@ const NetworkPanel = (props) => {
                   </Bar>
                 </BarChart>
               </TableCell>
-            </TableRow>
+            </StyledTableRow>
             {children.map((child, j) => renderRow(child, j, indent+1))}
           </React.Fragment>        
         )
@@ -88,14 +88,14 @@ const NetworkPanel = (props) => {
 
       return (
         <TableContainer component={Paper} style={{width: '100%', fontSize: '20px'}}>
-          <Table sx={{ minWidth: 450 }} aria-label="Server-side Fetching Summary">
+          <Table sx={{ minWidth: 450 }} size="small" aria-label="Server-side Fetching Summary">
             <TableHead>
               <TableRow>
-                <TableCell>Endpoint / URL</TableCell>
-                <TableCell>Method</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Duration (ms)</TableCell>
-                <TableCell>Waterfall</TableCell>
+                <TableCell style={{fontWeight: "bold"}}>Endpoint / URL</TableCell>
+                <TableCell style={{fontWeight: "bold"}}>Method</TableCell>
+                <TableCell style={{fontWeight: "bold"}}>Status</TableCell>
+                <TableCell style={{fontWeight: "bold"}}>Duration (ms)</TableCell>
+                <TableCell style={{fontWeight: "bold"}}>Waterfall</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
