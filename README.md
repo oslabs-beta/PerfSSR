@@ -145,7 +145,7 @@ npm run build
 
 ## Examples
 
-To see examples of how to set up your app, we've included an sample app in the `examples` folder.
+To see examples of how to set up your app, we've included a sample app in the `examples` folder.
 
 ## Contributors
 
