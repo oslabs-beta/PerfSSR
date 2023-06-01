@@ -37,6 +37,11 @@ Next.js already instruments using [OpenTelemetry](https://nextjs.org/docs/app/bu
 
 Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
 
+
+![fetchrepo](./assets/repo-fetching.png?raw=true "repo fetching")
+![fetchstore](./assets/store-fetching.png?raw=true "store fetching")
+
+
 ---
 
 ## Setup
@@ -46,7 +51,7 @@ Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
 1. [Google Chrome](https://www.google.com/chrome/)
 2. Ensure you have [React Dev Tools](https://react.dev/learn/react-developer-tools) installed
 3. In your project directory `npm install perfssr --save-dev`
-4. Instal our [PerfSSR Chrome Extension](#chrome-extension-installation)
+4. Install our [PerfSSR Chrome Extension](#chrome-extension-installation)
 5. As of the current Next.js version [13.4.4], [instrumentation](https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation) is an experimental hook so it must be included in the `next.config.js` file. Add the following code to your next config object.
 
    ```javascript
