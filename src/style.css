@@ -1,0 +1,231 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+html,body{
+    display: grid;
+    height: 100%;
+    place-items: center;
+    background: #131219;
+  }
+.title{
+    font-size: 20px;
+    color: whitesmoke;
+    font-family: 'Poppins',sans-serif;
+    position: relative;
+    margin-bottom: 40px;
+}
+/* Refresh Button */
+.container{
+    text-align: center;
+}
+.refresh-button{
+    font-family: 'Poppins',sans-serif;
+    position: relative;
+    height: 65px;
+    width: 400px;
+    margin: auto; 
+    margin-bottom: 40px; 
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    outline: none;
+    cursor: pointer;
+    background: #0d0d0d;
+    overflow: hidden;
+    transition: 0.6s;
+    color: #206592;
+    border-color: #206592;
+  }
+  .refresh-button:before, refresh-button:after{
+    position: absolute;
+    content: '';
+    left: 0;
+    top: 0;
+    height: 100%;
+    filter: blur(30px);
+    opacity: 0.4;
+    transition: 0.6s;
+  }
+  .refresh-button:before{
+    width: 60px;
+    background: rgba(255,255,255,0.6);
+    transform: translateX(-130px) skewX(-45deg);
+  }
+  .refresh-button:after{
+    width: 30px;
+    background: rgba(255,255,255,0.6);
+    transform: translateX(-130px) skewX(-45deg);
+  }
+  .refresh-button:hover:before,
+  .refresh-button:hover:after{
+    opacity: 0.6;
+    transform: translateX(320px) skewX(-45deg);
+  }
+  .refresh-button:hover{
+    color: #f2f2f2;
+    background: #206592;
+  }
+
+
+/* Regenerate Button */
+.reg-button{
+    font-family: 'Poppins',sans-serif;
+    position: relative;
+    height: 40px;
+    width: 300px;
+    margin: auto;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    outline: none;
+    cursor: pointer;
+    background: #0d0d0d;
+    overflow: hidden;
+    transition: 0.6s;
+    color: #ce5c0c;
+    border-color: #ce5c0c;
+  }
+  .reg-button:before, refresh-button:after{
+    position: absolute;
+    content: '';
+    left: 0;
+    top: 0;
+    height: 100%;
+    filter: blur(30px);
+    opacity: 0.4;
+    transition: 0.6s;
+  }
+  .reg-button:before{
+    width: 60px;
+    background: rgba(255,255,255,0.6);
+    transform: translateX(-130px) skewX(-45deg);
+  }
+  .reg-button:after{
+    width: 30px;
+    background: rgba(255,255,255,0.6);
+    transform: translateX(-130px) skewX(-45deg);
+  }
+  .reg-button:hover:before,
+  .reg-button:hover:after{
+    opacity: 0.6;
+    transform: translateX(320px) skewX(-45deg);
+  }
+  .reg-button:hover{
+    color: #f2f2f2;
+    background: #ce5c0c;
+  }
+
+/* Overall Performance Metrics */
+#mainBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+    position: relative;
+}
+
+#metric-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.metric-container-inner {
+    padding: 10px;
+    min-width: 530px;
+}
+
+.metric {
+    transition: all 0.2s ease-in-out;
+}
+  
+.metric:hover {
+transform: scale(1.05);
+}
+
+#metricCircle {
+    border-radius: 50%;
+}
+
+
+.chart-title{
+  font-size: 15px;
+  color: whitesmoke;
+  font-family: 'Poppins',sans-serif;
+  position: relative;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.toggle-text{
+  font-size: 10px;
+  color: whitesmoke;
+  font-family: 'Poppins',sans-serif;
+  position: relative;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.panel {
+  font-size: 15px;
+  color: whitesmoke;
+  font-family: 'Poppins',sans-serif;
+}
+
+/* Size of charts */
+.chart-dimension {
+  margin: auto;
+  width: 80%;
+}
+
+/* Clear Network Button */
+.clear-button{
+  font-family: 'Poppins',sans-serif;
+  position: relative;
+  height: 25px;
+  width: 200px;
+  margin: auto auto 10px auto;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  outline: none;
+  cursor: pointer;
+  background: #0d0d0d;
+  overflow: hidden;
+  transition: 0.6s;
+  color: #206592;
+  border-color: #206592;
+}
+.clear-button:before, refresh-button:after{
+  position: absolute;
+  content: '';
+  left: 0;
+  top: 0;
+  height: 100%;
+  filter: blur(30px);
+  opacity: 0.4;
+  transition: 0.6s;
+}
+.clear-button:before{
+  width: 60px;
+  background: rgba(255,255,255,0.6);
+  transform: translateX(-130px) skewX(-45deg);
+}
+.clear-button:after{
+  width: 30px;
+  background: rgba(255,255,255,0.6);
+  transform: translateX(-130px) skewX(-45deg);
+}
+.clear-button:hover:before,
+.clear-button:hover:after{
+  opacity: 0.6;
+  transform: translateX(320px) skewX(-45deg);
+}
+.clear-button:hover{
+  color: #f2f2f2;
+  background: #206592;
+}
