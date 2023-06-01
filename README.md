@@ -103,14 +103,9 @@ Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
    ```
       2. You will need to add all these OpenTelemetry modules as dependencies to your `package.json`
    ```javascript
-   "dependencies": {
-    "@opentelemetry/exporter-trace-otlp-http": "^0.39.1",
-    "@opentelemetry/resources": "^1.13.0",
-    "@opentelemetry/sdk-node": "^0.39.1",
-    "@opentelemetry/sdk-trace-node": "^1.13.0",
-    "@opentelemetry/semantic-conventions": "^1.13.0",
-    }
+    npm i --save-dev @opentelemetry/exporter-trace-otlp-http @opentelemetry/resources @opentelemetry/sdk-node @opentelemetry/sdk-trace-node @opentelemetry/semantic-conventions
    ```
+   
 
 8. Create a `.env` file in the root of your project directory. By default Next.js only creates spans for the API routes, but we want more information than that! To open it up, Next.js looks for a value set in `process.env` Add the line `NEXT_OTEL_VERBOSE=1` to your `.env` file.
 
