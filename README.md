@@ -56,7 +56,7 @@ Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
 
    ```javascript
    experimental: {
-     instrumentationHook: true;
+     instrumentationHook: true
    }
    ```
 
@@ -77,7 +77,7 @@ Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
 
 7. Create another file [.ts or .js] to your project root directory this can be named anything you'd like. We have ours called `perfssr.ts`
 
-   1. Inside perfssr.ts copy and paste this block of code
+   1. Inside `perfssr.ts` copy and paste this block of code
 
    ```javascript
    import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -101,6 +101,16 @@ Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
 
    sdk.start();
    ```
+      2. You will need to add all these OpenTelemetry modules as dependencies to your `package.json`
+   ```javascript
+   "dependencies": {
+    "@opentelemetry/exporter-trace-otlp-http": "^0.39.1",
+    "@opentelemetry/resources": "^1.13.0",
+    "@opentelemetry/sdk-node": "^0.39.1",
+    "@opentelemetry/sdk-trace-node": "^1.13.0",
+    "@opentelemetry/semantic-conventions": "^1.13.0",
+    }
+   ```
 
 8. Create a `.env` file in the root of your project directory. By default Next.js only creates spans for the API routes, but we want more information than that! To open it up, Next.js looks for a value set in `process.env` Add the line `NEXT_OTEL_VERBOSE=1` to your `.env` file.
 
@@ -120,7 +130,7 @@ Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
 git clone https://github.com/oslabs-beta/perfSSR.git
 ```
 
-2. Install dependencies and build the PerfSSR applicaiton locally
+2. Install dependencies and build the PerfSSR application locally
 
 ```
 npm install
@@ -145,7 +155,7 @@ npm run build
 
 ## Examples
 
-To see examples of how to set up your app, we've included an sample app in the `examples` folder.
+To see examples of how to set up your app, we've included a sample app in the `examples` folder.
 
 ## Contributors
 
