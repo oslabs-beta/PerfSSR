@@ -1,5 +1,3 @@
-console.log("contentScript.js is running");
-
 export interface FiberMsg {
     type: string;
     payload: string;  
@@ -54,7 +52,6 @@ interface LayoutShiftEntry extends PerformanceEntry {
 function initializePerformanceObserver() {
   const po = new PerformanceObserver((entryList) => {
     for (const entry of entryList.getEntries()) {
-      console.log(entry.entryType, entry.name, entry.startTime);
       if (
         entry.entryType === "paint" &&
         entry.name === "first-contentful-paint"

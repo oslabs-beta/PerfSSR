@@ -4,7 +4,6 @@ import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip } from 'recha
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 const NetworkPanel = (props) => {
-  // console.log("props.chartData: ", props.chartData)
   const waterfall = props.chartData ? processData(props.chartData) : null;
   
   //function to process start/end times for waterfall data

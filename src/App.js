@@ -48,20 +48,19 @@ function App() {
   );
 
   const [metrics, setMetrics] = useState({});
-  const [httpReq, setHttpReq] = useState({ data: {} });
-  const [httpToggle, setHttpToggle] = useState(false);
   const [fiberTree, setFiberTree] = useState();
   const [messagesList, setMessagesList] = useState([]);
   const ws = useWebSocket({ socketUrl: "ws://localhost:4000" });
 
   useEffect(() => {
     const getMessageFromQueue = () => {
+      // Initial fiber tree will be sent before App.js renders
+      // so send a message to background.ts once App.js is done rendering to retrieve the fiber tree message
       chrome.runtime.sendMessage(
         { type: "GET_MESSAGE_FROM_QUEUE" },
         (message) => {
           if (message) {
             // Process the message retrieved from the queue
-            console.log("Message from queue:", message);
             setFiberTree(JSON.parse(message.payload));
           }
         }
@@ -70,23 +69,20 @@ function App() {
     getMessageFromQueue();
   }, []);
 
-  // receive messages from socket
+  // receive messages from socket and set the messageList accoridngly
   useEffect(() => {
     if (ws.data) {
       const { message } = ws.data;
-      // console.log("message: ", message)
       setMessagesList((prevMessagesList) => {
         if (message.length > 0) return [].concat(message, prevMessagesList);
       })
     }
   }, [ws.data]);
 
-  // useEffect(() => {
-  //   console.log("fiberTree: ", fiberTree);
-  // }, [fiberTree]);
-
   useEffect(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      // listener to the message sent from background.ts 
+      // if the message is on metrics, set the metrics accordingly
       setMetrics((prevMetrics) => {
         return {
           ...prevMetrics,
@@ -94,12 +90,12 @@ function App() {
         };
       });
 
+      // if the message is on fiber tree, set the fiberTree accordingly
       setFiberTree((prevFiberTree) => {
         if (
           message.type === "UPDATED_FIBER" ||
           message.type === "FIBER_INSTANCE"
         ) {
-          // console.log("UPDATED_FIBER received: ", message);
           return JSON.parse(message.payload);
         }
         return prevFiberTree;

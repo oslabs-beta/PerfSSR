@@ -6,14 +6,11 @@ let rdtOnCommitFiberRoot;
 let updatedFiberTree: any;
 
 
-console.log("this means the injected file is running");
 //__REACT_DEVTOOLS_GLOBAL_HOOK__ instantiation of React Dev Tools within our app
 // can be accessed by using window.__REACT_DEVTOOLS_GLOBAL_HOOK__
 devTool = window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
-console.log("RDT instance", devTool);
 
 rootNode = devTool.getFiberRoots(1).values().next().value;
-console.log(rootNode);
 
 if (!devTool) {
   console.log(
@@ -31,7 +28,6 @@ const throttle = (
   // return function that takes new render event's fiber node arg
   return (arg) => {
     if (shouldWait) {
-      console.log("throttle anonymous: shouldWait is true, returning....");
       return;
     }
 
@@ -99,7 +95,6 @@ const throttleUpdatedFiberTree = throttle(function (updatedFiberNode) {
   const newTree =
     rootNode && rootNode.current ? new Tree(rootNode.current) : undefined;
   
-  console.log("built tree", newTree);
   
   //Check if the we have an instance of the tree
   //send it to the content script which will send it to background.js

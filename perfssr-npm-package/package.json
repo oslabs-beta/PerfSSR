@@ -1,0 +1,23 @@
+{
+  "name": "perfssr",
+  "version": "1.0.0",
+  "description": "Performance Analytics Tool for Next.js",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oslabs-beta/perfssr.git"
+  },
+  "keywords": [
+    "Nextjs",
+    "PerfSSR"
+  ],
+  "author": "OSLabs Beta",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/oslabs-beta/perfssr/issues"
+  },
+  "homepage": "https://github.com/oslabs-beta/perfssr#readme"
+}

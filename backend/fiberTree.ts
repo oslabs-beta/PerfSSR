@@ -145,9 +145,6 @@ class Tree {
     function traverse(fiberNode: any, parentTreeNode: any) {
       const { tag } = fiberNode;
       const tagName = getFiberNodeTagName(tag);
-      //console.log("current fiberNode ", fiberNode);
-      //console.log("current elementType", elementType);
-      //'Function Component' || tagName === 'Class Component' ||
       let newNode: any;
       if (
         tagName === "Host Root" ||
@@ -157,7 +154,6 @@ class Tree {
       ) {
         // Create a TreeNode using the FiberNode
         newNode = new TreeNode(fiberNode);
-        //console.log(newNode)
         // If parentTreeNode is null, set the root of the tree
         if (!parentTreeNode) {
           this.root = newNode;
@@ -272,7 +268,7 @@ const getFiberNodeTagName = (tagNum: number) => {
       break;
     default:
       console.log(
-        "helperFns getFiberNodeTagName error - unrecognized tag number ",
+        "Unrecognized tag number",
         tagNum
       );
   }

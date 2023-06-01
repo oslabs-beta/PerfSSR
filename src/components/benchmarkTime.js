@@ -50,7 +50,6 @@ const BenchmarkTime = (props) => {
     
     bfs(tree);
     let avg = inputData.reduce((acc, curr) => acc + curr.time, 0) / inputData.length;
-    console.log("avg: ", avg);
 
     const processBenchmarking = (t) => {
       let result;

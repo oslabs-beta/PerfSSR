@@ -12,12 +12,9 @@ const messageQueue: FiberMsg[] = [];
 
 
 const sendMessageToDevTool = (msg: {}) => {
-  // console.log("port inside", currPort);
   if (currPort === undefined) {
-    console.log("background.js: no port to send message to!");
     return;
   }
-  // console.log("background.js sending message to dev tool:", msg);
   chrome.runtime.sendMessage({ message: msg });
 };
 
@@ -62,8 +59,6 @@ chrome.runtime.onConnect.addListener((port) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   //Send fiber instance to App.js of devtool
   if (message.type === "UPDATED_FIBER" || message.type === "FIBER_INSTANCE") {
-    console.log(message);
-    console.log(`Sending ${message.type} message to App.js:`, message);
     chrome.runtime.sendMessage(message);
     // Add the fiber tree to the queue so App.js can retieve the fiber tree message 
     // after the app / frontend is rendered
