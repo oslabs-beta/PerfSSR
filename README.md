@@ -56,7 +56,7 @@ Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
 
    ```javascript
    experimental: {
-     instrumentationHook: true;
+     instrumentationHook: true
    }
    ```
 
