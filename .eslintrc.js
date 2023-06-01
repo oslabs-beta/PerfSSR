@@ -1,21 +1,3 @@
-// module.exports = {
-//   env: {
-//     browser: true,
-//     es6: true,
-//     node: true,
-//   },
-//   extends: ["eslint:recommended", "plugin:react/recommended"],
-//   parserOptions: {
-//     ecmaVersion: "latest",
-//     ecmaFeatures: {
-//         jsx: true
-//     },
-//     sourceType: "module",
-//   },
-
-//   parser: "@babel/eslint-parser",
-// };
-
 module.exports = {
   env: {
     browser: true, // Browser global variables like `window` etc.

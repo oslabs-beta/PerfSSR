@@ -56,8 +56,6 @@ const ClientComponent = (props) => {
     if (inputData.length === 0) setToggle(false); 
     else setToggle(true);
 
-    console.log("client side input data: ", inputData)
-
     if (!chartRef.current) {
       return;
     }

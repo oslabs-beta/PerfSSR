@@ -52,9 +52,7 @@ const ServerComponent = (props) => {
 
     if (inputData.length === 0) setToggle(false); 
     else setToggle(true);
-
-    //console.log("server side input data: ", inputData)
-
+    
     if (!chartRef.current) {
       return;
     }

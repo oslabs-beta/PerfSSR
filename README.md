@@ -136,8 +136,12 @@ npm run build
 - Click on **Regenerate Metrics** will refresh the page to get updated rendering data
 - Click on **Clear Network Data** under the Server-side Fetching Summary table will clear all the current requests logged so far
 
-**Note**: PerfSSR is intended for analyzing and providing performance insights into Next.js applications **in development mode** running on `local host: 3000`
+**Note**: PerfSSR is intended for analyzing and providing performance insights into Next.js applications **in development mode** running on `localhost:3000`
 
 ## Examples
 
 To see examples of how to set up your app, we've included an sample app in the `examples` folder.
+
+## Contributors
+
+[James Ye](https://github.com/ye-james) | [Summer Pu](https://github.com/summep) | [Jessica Vo](https://github.com/jessicavo) | [Jonathan Hosea](https://github.com/jhosea92)
