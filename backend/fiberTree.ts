@@ -1,59 +1,42 @@
 class TreeNode {
   children: any[];
   siblings: any[];
+  _debugHookTypes: null | string | string[];
   actualStartTime: number;
-  selfBaseDuration: number;
-  renderDurationMS: number;
   componentName: string;
+  componentProps: any;
+  key: any;
+  renderDurationMS: number;
+  selfBaseDuration: number;
   tagObj: {
             tag: number;
             tagName: string
           };
-  componentState: any;
-  componentProps: any;
-  key: any;
-  _debugHookTypes: null | string | string[];
 
   constructor(fiberNode: any) {
     const {
-      memoizedState,
-      memoizedProps,
-      elementType,
-      tag,
+      _debugHookTypes,
       actualDuration,
       actualStartTime,
-      selfBaseDuration,
+      elementType,
       key,
-      _debugHookTypes,
+      memoizedProps,
+      selfBaseDuration,
+      tag,
     } = fiberNode;
 
+    //properties to store the found children/siblings
     this.children = [];
     this.siblings = [];
 
     this.setTagObj(tag);
     this.setComponentName(elementType, tag, memoizedProps);
     this.setProps(memoizedProps);
-    this.setState(memoizedState);
     this.setKey(key);
     this.setHookTypes(_debugHookTypes);
-
-
     //render time here includes render time for this fiber node and the time took to render all its children
     this.setRenderDurationMS(actualDuration);
-
-    // Not sure if we need these, but saving them anyway
-
-    /*
-      - actualStartTime = If the Fiber is currently active in the "render" phase, it marks the time at which the work began.
-      - This field is only set when the enableProfilerTimer flag is enabled.
-    */
     this.actualStartTime = actualStartTime;
-
-    /*
-      - selfBaseDuration = Duration of the most recent render time for this Fiber.
-      - This value is not updated when we bailout for memoization purposes.
-      - This field is only set when the enableProfilerTimer flag is enabled.
-    */
     this.selfBaseDuration = selfBaseDuration;
   }
 
@@ -67,10 +50,26 @@ class TreeNode {
     if (newNode) this.siblings.push(newNode);
   }
 
+  setRenderDurationMS(actualDuration: number) {
+    this.renderDurationMS = actualDuration;
+  }
+
+  setProps(memoizedProps: any) {
+    this.componentProps = memoizedProps;
+  }
+
+  setKey(key: any) {
+    //if there is a key defined for the component, grab it 
+    this.key = key;
+  }
+
+  setHookTypes(_debugHookTypes: null | string | string[]) {
+    this._debugHookTypes = _debugHookTypes;
+  }
+
   setComponentName(elementType: any, tag: any, memoizedProps: any) {
     try {
       if (elementType && elementType.hasOwnProperty("name")) {
-        // Root node will always have the hardcoded component name 'root'
         this.componentName =
           this.tagObj.tagName === "Host Root" ? "Root" : elementType.name;
       } else if (tag === 11 && (memoizedProps.href || memoizedProps.src)) { 
@@ -112,70 +111,46 @@ class TreeNode {
     }
   }
 
-  setRenderDurationMS(actualDuration: number) {
-    this.renderDurationMS = actualDuration;
-  }
 
-  setState(memoizedState: any) {
-    this.componentState = memoizedState;
-  }
-
-  setProps(memoizedProps: any) {
-    this.componentProps = memoizedProps;
-  }
-
-  setKey(key: any) {
-    //if there is a key defined for the component, grab it 
-    this.key = key;
-  }
-
-  setHookTypes(_debugHookTypes: null | string | string[]) {
-    this._debugHookTypes = _debugHookTypes;
-  }
 }
 
 class Tree {
   root: any;
-  constructor(rootFiberNode: any) {
+  constructor(fiberNode: any) {
     this.root = null;
-    this.buildTree(rootFiberNode);
+    this.createTree(fiberNode);
   }
 
-  buildTree(rootFiberNode: any) {
+  createTree(fiberNode: any) {
     function traverse(fiberNode: any, parentTreeNode: any) {
       const { tag } = fiberNode;
       const tagName = getFiberNodeTagName(tag);
       let newNode: any;
       if (
+        //we only want components with these tag names
         tagName === "Host Root" ||
-        tagName === "Host Component" ||
+        tagName === "Host Component" || // components usually converted to html-like name
         tagName === "Function Component" ||
-        tagName === "Forward Ref"
+        tagName === "Forward Ref" //this is to grab next/link components
       ) {
-        // Create a TreeNode using the FiberNode
         newNode = new TreeNode(fiberNode);
-        // If parentTreeNode is null, set the root of the tree
         if (!parentTreeNode) {
           this.root = newNode;
         } else {
-          // Add the new TreeNode to the parent's children array
           parentTreeNode.addChild(newNode);
         }
       }
 
-      // If fiberNode has a child, traverse down the tree
       if (fiberNode.child) {
         traverse(fiberNode.child, newNode ? newNode : parentTreeNode);
       }
-
-      // If fiberNode has a sibling, traverse to the sibling
 
       if (fiberNode.sibling) {
         traverse(fiberNode.sibling, parentTreeNode);
       }
     }
 
-    traverse.call(this, rootFiberNode, null);
+    traverse.apply(this, [fiberNode, null]);
   }
 }
 

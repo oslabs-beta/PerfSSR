@@ -36,6 +36,7 @@ Fetches made server-side get logged in your terminal not the browser. PerfSSR De
 Next.js already instruments using [OpenTelemetry](https://nextjs.org/docs/app/building-your-application/optimizing/open-telemetry) for us out of the box so we can just access their built-in spans.
 
 Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
+Credit to [ReaPer](https://github.com/oslabs-beta/ReaPer) and [Reactime](https://github.com/open-source-labs/reactime) for the idea of accessing render times via React Dev Tool hooks. 
 
 
 ![fetchrepo](./assets/repo-fetching.png?raw=true "repo fetching")
@@ -51,6 +52,13 @@ Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
 1. [Google Chrome](https://www.google.com/chrome/)
 2. Ensure you have [React Dev Tools](https://react.dev/learn/react-developer-tools) installed
 3. In your project directory `npm install perfssr --save-dev`
+
+    and additional OpenTelemtry dependecies 
+
+    ```javascript
+    npm i --save-dev @opentelemetry/exporter-trace-otlp-http @opentelemetry/resources @opentelemetry/sdk-node @opentelemetry/sdk-trace-node @opentelemetry/semantic-conventions
+    ```
+
 4. Install our [PerfSSR Chrome Extension](#chrome-extension-installation)
 5. As of the current Next.js version [13.4.4], [instrumentation](https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation) is an experimental hook so it must be included in the `next.config.js` file. Add the following code to your next config object.
 
@@ -100,11 +108,7 @@ Credit to [NetPulse](https://github.com/oslabs-beta/NetPulse) for this idea.
    });
 
    sdk.start();
-   ```
-      2. You will need to add all these OpenTelemetry modules as dependencies to your `package.json`
-   ```javascript
-    npm i --save-dev @opentelemetry/exporter-trace-otlp-http @opentelemetry/resources @opentelemetry/sdk-node @opentelemetry/sdk-trace-node @opentelemetry/semantic-conventions
-   ```
+
    
 
 8. Create a `.env` file in the root of your project directory. By default Next.js only creates spans for the API routes, but we want more information than that! To open it up, Next.js looks for a value set in `process.env` Add the line `NEXT_OTEL_VERBOSE=1` to your `.env` file.
